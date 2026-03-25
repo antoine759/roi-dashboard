@@ -136,6 +136,9 @@ const fE = n => typeof n==='number'&&n!==0 ? n.toLocaleString('fr-FR',{style:'cu
 const fP = n => typeof n==='number'&&isFinite(n) ? n.toFixed(1)+'%' : '—';
 const fR = n => n==null ? '—' : (n>=0?'+':'')+Math.round(n)+'%';
 const fN = n => typeof n==='number' ? n.toLocaleString('fr-FR') : '—';
+const fCpl = n => typeof n==='number'&&n>0 ? n.toLocaleString('fr-FR',{style:'currency',currency:'EUR',minimumFractionDigits:0,maximumFractionDigits:0}) : '—';
+const fCac = n => typeof n==='number'&&n>0 ? n.toLocaleString('fr-FR',{style:'currency',currency:'EUR',minimumFractionDigits:0,maximumFractionDigits:0}) : '—';
+// CAC = CPL réel / taux de closing = coût TTC / nb deals gagnés
 
 function rb(roi) {
   if (roi==null) return '<span class="badge" style="background:var(--bg2);color:var(--text2)">—</span>';
@@ -294,6 +297,8 @@ function rGlobal() {
         <div class="kcard pos"><div class="klbl">Deals gagnés</div><div class="kval">${fN(t.nb_deals_gagnes)}</div><div class="ksub">${fP(t.nb_leads>0?t.nb_deals_gagnes/t.nb_leads*100:0)} conv.</div></div>
         <div class="kcard"><div class="klbl">CA total</div><div class="kval" style="font-size:20px">${fE(t.ca)}</div><div class="ksub">panier ${fE(t.panier_moyen)}</div></div>
         <div class="kcard"><div class="klbl">Coût TTC</div><div class="kval" style="font-size:20px">${fE(t.cout_ttc)}</div><div class="ksub">HT ${fE(t.cout_ht)}</div></div>
+        <div class="kcard"><div class="klbl">CPL réel TTC</div><div class="kval" style="font-size:20px;color:var(--amber)">${fE(t.nb_leads>0?Math.round(t.cout_ttc/t.nb_leads):0)}</div><div class="ksub">coût TTC / lead</div></div>
+        <div class="kcard"><div class="klbl">CAC réel TTC</div><div class="kval" style="font-size:20px;color:var(--amber)">${fCac(t.nb_deals_gagnes>0?Math.round(t.cout_ttc/t.nb_deals_gagnes):0)}</div><div class="ksub">CPL ÷ taux closing</div></div>
         <div class="kcard pos"><div class="klbl">Bénéfice net</div><div class="kval" style="font-size:20px">${fE(t.benefice_net)}</div></div>
         <div class="kcard pos"><div class="klbl">ROI</div><div class="kval">${fR(t.roi)}</div><div class="ksub">sur coût TTC</div></div>
       </div>
@@ -331,7 +336,7 @@ function rMonthly() {
         <th style="font-size:10px;color:var(--text3)">prospects</th>
         <th style="font-size:10px;color:var(--text3)">affaires</th>
         <th>Gagnés</th><th>Taux conv.</th><th>CA</th><th>Panier</th>
-        <th>Coût HT</th><th>Coût TTC</th><th>Bénéfice</th><th>ROI</th>
+        <th>Coût HT</th><th>Coût TTC</th><th>CPL réel</th><th>CAC réel</th><th>Bénéfice</th><th>ROI</th>
       </tr></thead>
       <tbody>${m.map(r=>`<tr>
         <td><strong>${r.month}</strong></td>
@@ -343,6 +348,8 @@ function rMonthly() {
         <td>${fE(r.ca)}</td><td>${fE(r.panier_moyen)}</td>
         <td style="color:var(--text2)">${fE(r.cout_ht)}</td>
         <td>${fE(r.cout_ttc)}</td>
+        <td style="color:var(--amber)">${fCpl(r.nb_leads>0?Math.round(r.cout_ttc/r.nb_leads):0)}</td>
+        <td style="color:var(--amber)">${fCac(r.nb_deals_gagnes>0?Math.round(r.cout_ttc/r.nb_deals_gagnes):0)}</td>
         <td style="color:${r.benefice_net>=0?'var(--green)':'var(--red)'}">${fE(r.benefice_net)}</td>
         <td>${rb(r.roi)}</td>
       </tr>`).join('')}
@@ -354,6 +361,8 @@ function rMonthly() {
           <td>${fE(t.ca)}</td><td>${fE(t.panier_moyen)}</td>
           <td style="color:var(--text2)">${fE(t.cout_ht)}</td>
           <td>${fE(t.cout_ttc)}</td>
+          <td style="color:var(--amber)">${fCpl(t.nb_leads>0?Math.round(t.cout_ttc/t.nb_leads):0)}</td>
+          <td style="color:var(--amber)">${fCac(t.nb_deals_gagnes>0?Math.round(t.cout_ttc/t.nb_deals_gagnes):0)}</td>
           <td style="color:${t.benefice_net>=0?'var(--green)':'var(--red)'}">${fE(t.benefice_net)}</td>
           <td>${rb(t.roi)}</td>`;})()}
       </tr>
@@ -380,7 +389,7 @@ function rCampaign() {
     <div class="sec"><table>
       <thead><tr>
         <th>Campagne</th><th>Leads</th><th>Gagnés</th><th>Taux</th>
-        <th>CA</th><th>Panier</th><th>Coût HT</th><th>Coût TTC</th><th>Bénéfice</th><th>ROI</th>
+        <th>CA</th><th>Panier</th><th>Coût HT</th><th>Coût TTC</th><th>CPL réel</th><th>CAC réel</th><th>Bénéfice</th><th>ROI</th>
       </tr></thead>
       <tbody>${c.map(r=>`<tr>
         <td class="tdt" title="${r.campaign}">${r.campaign}</td>
@@ -389,6 +398,8 @@ function rCampaign() {
         <td>${fE(r.ca)}</td><td>${fE(r.panier_moyen)}</td>
         <td style="color:var(--text2)">${fE(r.cout_ht)}</td>
         <td>${fE(r.cout_ttc)}</td>
+        <td style="color:var(--amber)">${fCpl(r.nb_leads>0?Math.round(r.cout_ttc/r.nb_leads):0)}</td>
+        <td style="color:var(--amber)">${fCac(r.nb_deals_gagnes>0?Math.round(r.cout_ttc/r.nb_deals_gagnes):0)}</td>
         <td style="color:${r.benefice_net>=0?'var(--green)':'var(--red)'}">${fE(r.benefice_net)}</td>
         <td>${rb(r.roi)}</td>
       </tr>`).join('')}</tbody>
