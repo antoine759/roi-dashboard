@@ -3,972 +3,239 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard ROI · Acquisition</title>
+  <title>Dashboard ROI · MaFormation</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --bg: #ffffff;
-      --bg2: #f7f7f5;
-      --bg3: #f1efea;
-      --text: #1a1a18;
-      --text2: #6b6b66;
-      --text3: #a0a09a;
-      --border: rgba(0,0,0,0.1);
-      --border2: rgba(0,0,0,0.18);
-      --blue: #378ADD;
-      --blue-bg: #E6F1FB;
-      --blue-text: #0C447C;
-      --green: #1D9E75;
-      --green-bg: #E1F5EE;
-      --green-text: #085041;
-      --teal-bg: #E1F5EE;
-      --teal-text: #085041;
-      --amber: #BA7517;
-      --amber-bg: #FAEEDA;
-      --amber-text: #633806;
-      --red: #E24B4A;
-      --red-bg: #FCEBEB;
-      --red-text: #791F1F;
-      --gray-bg: #F1EFE8;
-      --gray-text: #444441;
-      --radius: 8px;
-      --radius-lg: 12px;
+      --bg:#fff;--bg2:#f7f7f5;--bg3:#f1efea;--text:#1a1a18;--text2:#6b6b66;--text3:#a0a09a;
+      --border:rgba(0,0,0,.1);--border2:rgba(0,0,0,.18);
+      --blue:#378ADD;--blue-bg:#E6F1FB;--blue-text:#0C447C;
+      --green:#1D9E75;--green-bg:#E1F5EE;--green-text:#085041;
+      --amber:#BA7517;--amber-bg:#FAEEDA;--amber-text:#633806;
+      --red:#E24B4A;--red-bg:#FCEBEB;--red-text:#791F1F;
+      --r:8px;--rl:12px;
     }
-
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #1e1e1c;
-        --bg2: #2a2a28;
-        --bg3: #323230;
-        --text: #e8e6e0;
-        --text2: #9e9c96;
-        --text3: #6b6966;
-        --border: rgba(255,255,255,0.1);
-        --border2: rgba(255,255,255,0.18);
-        --blue-bg: #0c2d4a;
-        --blue-text: #85B7EB;
-        --green-bg: #04342C;
-        --green-text: #9FE1CB;
-        --teal-bg: #04342C;
-        --teal-text: #9FE1CB;
-        --amber-bg: #412402;
-        --amber-text: #FAC775;
-        --red-bg: #501313;
-        --red-text: #F09595;
-        --gray-bg: #2C2C2A;
-        --gray-text: #D3D1C7;
-      }
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: var(--bg3);
-      color: var(--text);
-      font-size: 14px;
-      line-height: 1.5;
-      min-height: 100vh;
-    }
-
-    /* Layout */
-    .sidebar {
-      position: fixed; top: 0; left: 0; bottom: 0;
-      width: 220px; background: var(--bg);
-      border-right: 0.5px solid var(--border);
-      display: flex; flex-direction: column;
-      z-index: 100;
-    }
-    .sidebar-logo {
-      padding: 20px 20px 16px;
-      border-bottom: 0.5px solid var(--border);
-    }
-    .sidebar-logo h1 { font-size: 15px; font-weight: 600; }
-    .sidebar-logo p { font-size: 11px; color: var(--text3); margin-top: 2px; }
-    .sidebar-nav { flex: 1; padding: 12px 0; overflow-y: auto; }
-    .nav-section { padding: 4px 12px; font-size: 10px; font-weight: 600;
-      color: var(--text3); text-transform: uppercase; letter-spacing: .06em;
-      margin: 12px 0 4px; }
-    .nav-item {
-      display: flex; align-items: center; gap: 10px;
-      padding: 8px 16px; font-size: 13px; color: var(--text2);
-      cursor: pointer; border-radius: 6px; margin: 1px 8px;
-      transition: background .12s, color .12s;
-    }
-    .nav-item:hover { background: var(--bg2); color: var(--text); }
-    .nav-item.active { background: var(--blue-bg); color: var(--blue-text); font-weight: 500; }
-    .nav-item .icon { width: 16px; height: 16px; flex-shrink: 0; }
-    .sidebar-footer {
-      padding: 12px 16px;
-      border-top: 0.5px solid var(--border);
-      font-size: 12px; color: var(--text3);
-    }
-    .sync-status { display: flex; align-items: center; gap: 6px; }
-    .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
-    .sync-dot.loading { background: var(--amber); animation: pulse 1s ease-in-out infinite; }
-    .sync-dot.error { background: var(--red); }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
-
-    .main { margin-left: 220px; padding: 28px 32px; max-width: 1200px; }
-
-    /* Top bar */
-    .topbar {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
-    }
-    .topbar-title { font-size: 20px; font-weight: 600; }
-    .topbar-sub { font-size: 13px; color: var(--text2); margin-top: 2px; }
-    .topbar-actions { display: flex; gap: 8px; align-items: center; }
-
-    /* Buttons */
-    .btn {
-      font-size: 13px; padding: 7px 14px;
-      border: 0.5px solid var(--border2); border-radius: var(--radius);
-      background: var(--bg); color: var(--text);
-      cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
-      transition: background .12s;
-    }
-    .btn:hover { background: var(--bg2); }
-    .btn.primary { background: var(--blue); color: #fff; border-color: var(--blue); }
-    .btn.primary:hover { opacity: .9; }
-    .btn svg { width: 14px; height: 14px; }
-
-    /* Filters */
-    .filters {
-      display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; align-items: center;
-    }
-    .filters select, .filters input {
-      font-size: 13px; padding: 6px 10px;
-      border: 0.5px solid var(--border2); border-radius: var(--radius);
-      background: var(--bg); color: var(--text);
-    }
-    .filter-label { font-size: 12px; color: var(--text3); margin-left: auto; }
-
-    /* KPI Cards */
-    .kpi-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 12px; margin-bottom: 24px;
-    }
-    .kpi-card {
-      background: var(--bg); border: 0.5px solid var(--border);
-      border-radius: var(--radius-lg); padding: 16px 18px;
-    }
-    .kpi-label { font-size: 11px; color: var(--text2); font-weight: 500;
-      text-transform: uppercase; letter-spacing: .04em; margin-bottom: 8px; }
-    .kpi-value { font-size: 26px; font-weight: 600; line-height: 1; }
-    .kpi-sub { font-size: 12px; color: var(--text3); margin-top: 5px; }
-    .kpi-card.positive .kpi-value { color: var(--green); }
-    .kpi-card.negative .kpi-value { color: var(--red); }
-    .kpi-card.neutral .kpi-value { color: var(--blue); }
-
-    /* Sections */
-    .section {
-      background: var(--bg); border: 0.5px solid var(--border);
-      border-radius: var(--radius-lg); padding: 20px;
-      margin-bottom: 20px;
-    }
-    .section-header {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 16px;
-    }
-    .section-title { font-size: 14px; font-weight: 600; }
-    .section-sub { font-size: 12px; color: var(--text3); }
-
-    /* Tables */
-    table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    th {
-      text-align: left; font-size: 11px; font-weight: 600;
-      color: var(--text2); padding: 8px 10px;
-      border-bottom: 0.5px solid var(--border);
-      text-transform: uppercase; letter-spacing: .04em;
-      white-space: nowrap;
-    }
-    td { padding: 9px 10px; border-bottom: 0.5px solid var(--border); vertical-align: middle; }
-    tr:last-child td { border-bottom: none; }
-    tr:hover td { background: var(--bg2); }
-    .td-truncate { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-    /* Badges */
-    .badge {
-      display: inline-block; font-size: 11px; font-weight: 500;
-      padding: 2px 8px; border-radius: 20px; white-space: nowrap;
-    }
-    .badge-green { background: var(--green-bg); color: var(--green-text); }
-    .badge-blue { background: var(--blue-bg); color: var(--blue-text); }
-    .badge-red { background: var(--red-bg); color: var(--red-text); }
-    .badge-gray { background: var(--gray-bg); color: var(--gray-text); }
-    .badge-amber { background: var(--amber-bg); color: var(--amber-text); }
-    .ch-maformation { background: var(--teal-bg); color: var(--teal-text); }
-    .ch-google { background: var(--blue-bg); color: var(--blue-text); }
-    .ch-organic { background: var(--green-bg); color: var(--green-text); }
-    .ch-other { background: var(--gray-bg); color: var(--gray-text); }
-
-    /* Progress bars */
-    .progress { height: 5px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
-    .progress-fill { height: 100%; border-radius: 3px; background: var(--blue); }
-
-    /* Chart wrappers */
-    .chart-wrap { position: relative; width: 100%; height: 240px; }
-
-    /* Settings */
-    .settings-group {
-      background: var(--bg2); border-radius: var(--radius-lg);
-      padding: 18px 20px; margin-bottom: 16px;
-    }
-    .settings-group h3 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
-    .settings-group p { font-size: 13px; color: var(--text2); margin-bottom: 16px; }
-    .form-row {
-      display: flex; align-items: center; gap: 12px;
-      margin-bottom: 10px; flex-wrap: wrap;
-    }
-    .form-row label { font-size: 13px; color: var(--text2); min-width: 180px; }
-    .form-row input {
-      font-size: 13px; padding: 6px 10px; width: 130px;
-      border: 0.5px solid var(--border2); border-radius: var(--radius);
-      background: var(--bg); color: var(--text);
-    }
-    .form-row span { font-size: 12px; color: var(--text3); }
-
-    /* Loading / error */
-    .loading-screen, .error-screen {
-      display: flex; flex-direction: column; align-items: center;
-      justify-content: center; padding: 80px 40px; gap: 16px;
-      text-align: center;
-    }
-    .loading-spinner {
-      width: 32px; height: 32px; border-radius: 50%;
-      border: 2.5px solid var(--border2);
-      border-top-color: var(--blue);
-      animation: spin .7s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .error-box {
-      background: var(--red-bg); border: 0.5px solid var(--red);
-      border-radius: var(--radius); padding: 12px 16px;
-      font-size: 13px; color: var(--red-text); margin-bottom: 16px;
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-      .sidebar { width: 100%; position: relative; height: auto; }
-      .main { margin-left: 0; padding: 16px; }
-    }
+    @media(prefers-color-scheme:dark){:root{
+      --bg:#1e1e1c;--bg2:#2a2a28;--bg3:#323230;--text:#e8e6e0;--text2:#9e9c96;--text3:#6b6966;
+      --border:rgba(255,255,255,.1);--border2:rgba(255,255,255,.18);
+      --blue-bg:#0c2d4a;--blue-text:#85B7EB;--green-bg:#04342C;--green-text:#9FE1CB;
+      --amber-bg:#412402;--amber-text:#FAC775;--red-bg:#501313;--red-text:#F09595;
+    }}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg3);color:var(--text);font-size:14px;}
+    .sidebar{position:fixed;top:0;left:0;bottom:0;width:220px;background:var(--bg);border-right:.5px solid var(--border);display:flex;flex-direction:column;z-index:100;}
+    .slogo{padding:20px 20px 16px;border-bottom:.5px solid var(--border);}
+    .slogo h1{font-size:15px;font-weight:600;}
+    .slogo p{font-size:11px;color:var(--text3);margin-top:2px;}
+    .snav{flex:1;padding:12px 0;overflow-y:auto;}
+    .nsec{padding:4px 12px;font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin:12px 0 4px;}
+    .ni{display:flex;align-items:center;gap:10px;padding:8px 16px;font-size:13px;color:var(--text2);cursor:pointer;border-radius:6px;margin:1px 8px;transition:background .12s;}
+    .ni:hover{background:var(--bg2);color:var(--text);}
+    .ni.active{background:var(--blue-bg);color:var(--blue-text);font-weight:500;}
+    .ni svg{width:16px;height:16px;flex-shrink:0;}
+    .sfooter{padding:12px 16px;border-top:.5px solid var(--border);font-size:12px;color:var(--text3);}
+    .sdot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-right:6px;}
+    .main{margin-left:220px;padding:28px 32px;max-width:1200px;}
+    .topbar{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
+    .ttitle{font-size:20px;font-weight:600;}
+    .tsub{font-size:13px;color:var(--text2);margin-top:2px;}
+    .btn{font-size:13px;padding:7px 14px;border:.5px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--text);cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background .12s;}
+    .btn:hover{background:var(--bg2);}
+    .btn.p{background:var(--blue);color:#fff;border-color:var(--blue);}
+    .kgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:24px;}
+    .kcard{background:var(--bg);border:.5px solid var(--border);border-radius:var(--rl);padding:16px 18px;}
+    .klbl{font-size:11px;color:var(--text2);font-weight:500;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;}
+    .kval{font-size:24px;font-weight:600;line-height:1;}
+    .ksub{font-size:12px;color:var(--text3);margin-top:5px;}
+    .kcard.pos .kval{color:var(--green);}
+    .kcard.neg .kval{color:var(--red);}
+    .kcard.bl .kval{color:var(--blue);}
+    .sec{background:var(--bg);border:.5px solid var(--border);border-radius:var(--rl);padding:20px;margin-bottom:20px;}
+    .sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+    .st{font-size:14px;font-weight:600;}
+    table{width:100%;border-collapse:collapse;font-size:13px;}
+    th{text-align:left;font-size:11px;font-weight:600;color:var(--text2);padding:8px 10px;border-bottom:.5px solid var(--border);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;}
+    td{padding:9px 10px;border-bottom:.5px solid var(--border);vertical-align:middle;}
+    tr:last-child td{border-bottom:none;}
+    tr:hover td{background:var(--bg2);}
+    .tdt{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .badge{display:inline-block;font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;white-space:nowrap;}
+    .bg{background:var(--green-bg);color:var(--green-text);}
+    .bb{background:var(--blue-bg);color:var(--blue-text);}
+    .br{background:var(--red-bg);color:var(--red-text);}
+    .cw{position:relative;width:100%;}
+    .izone{border:2px dashed var(--border2);border-radius:var(--rl);padding:48px 32px;text-align:center;cursor:pointer;transition:background .15s;}
+    .izone:hover,.izone.drag{background:var(--bg2);border-color:var(--blue);}
+    .izone h3{font-size:16px;font-weight:500;margin-bottom:8px;}
+    .izone p{font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.6;}
+    .spin{width:28px;height:28px;border-radius:50%;border:2px solid var(--border2);border-top-color:var(--blue);animation:spin .7s linear infinite;margin:0 auto 16px;}
+    @keyframes spin{to{transform:rotate(360deg)}}
   </style>
 </head>
 <body>
-
 <div class="sidebar">
-  <div class="sidebar-logo">
-    <h1>ROI Dashboard</h1>
-    <p>Acquisition multi-canaux</p>
-  </div>
-  <nav class="sidebar-nav">
-    <div class="nav-section">Vues</div>
-    <div class="nav-item active" data-view="global" onclick="setView('global')">
-      <svg class="icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-        <rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/>
-        <rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/>
-      </svg>
+  <div class="slogo"><h1>ROI Dashboard</h1><p id="sch">MaFormation</p></div>
+  <nav class="snav">
+    <div class="nsec">Vues</div>
+    <div class="ni active" onclick="setView('global')">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
       Vue globale
     </div>
-    <div class="nav-item" data-view="channel" onclick="setView('channel')">
-      <svg class="icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-        <circle cx="8" cy="8" r="6"/><path d="M8 2a9 9 0 0 1 0 12M2 8h12"/>
-      </svg>
-      Par canal
-    </div>
-    <div class="nav-item" data-view="campaign" onclick="setView('campaign')">
-      <svg class="icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-        <path d="M2 12l4-8 3 5 2-3 3 6"/><rect x="1" y="1" width="14" height="14" rx="2"/>
-      </svg>
-      Par campagne
-    </div>
-    <div class="nav-item" data-view="monthly" onclick="setView('monthly')">
-      <svg class="icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-        <rect x="1" y="3" width="14" height="12" rx="1.5"/>
-        <path d="M5 1v4M11 1v4M1 7h14"/>
-      </svg>
+    <div class="ni" onclick="setView('monthly')">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="12" rx="1.5"/><path d="M5 1v4M11 1v4M1 7h14"/></svg>
       Par mois
     </div>
-    <div class="nav-section">Config</div>
-    <div class="nav-item" data-view="settings" onclick="setView('settings')">
-      <svg class="icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-        <circle cx="8" cy="8" r="2.5"/>
-        <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3 3l1.5 1.5M11.5 11.5L13 13M3 13l1.5-1.5M11.5 4.5L13 3"/>
-      </svg>
-      Réglages
+    <div class="ni" onclick="setView('campaign')">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12l4-8 3 5 2-3 3 6"/><rect x="1" y="1" width="14" height="14" rx="2"/></svg>
+      Par campagne
+    </div>
+    <div class="nsec">Données</div>
+    <div class="ni" onclick="setView('import')">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2v8M5 7l3 3 3-3"/><path d="M3 12h10"/></svg>
+      Importer JSON
     </div>
   </nav>
-  <div class="sidebar-footer">
-    <div class="sync-status" id="sync-status">
-      <div class="sync-dot" id="sync-dot"></div>
-      <span id="sync-label">Initialisation...</span>
-    </div>
-  </div>
+  <div class="sfooter"><span class="sdot"></span><span id="slbl">En attente de données</span></div>
 </div>
 
-<main class="main" id="main">
-  <div class="loading-screen">
-    <div class="loading-spinner"></div>
-    <p>Connexion à Pipedrive...</p>
-  </div>
-</main>
+<main class="main" id="main"></main>
 
 <script>
-const APP = {
-  view: 'global',
-  deals: [],
-  fields: {},
-  costs: {},
-  filterChannel: 'all',
-  filterMonth: 'all',
-  loading: false,
-  error: null,
-  lastSync: null,
-  charts: {},
-  dedupStats: null,
-  keptPipelineIds: [],
-  pipelineNames: {},
-  excludedCount: 0
-};
+const A={view:'import',data:null};
+const fE=n=>typeof n==='number'&&n!==0?n.toLocaleString('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}):'—';
+const fP=n=>typeof n==='number'&&isFinite(n)?n.toFixed(1)+'%':'—';
+const fR=n=>n==null?'—':(n>=0?'+':'')+Math.round(n)+'%';
+const fN=n=>typeof n==='number'?n.toLocaleString('fr-FR'):'—';
 
-// ─── Persistence ──────────────────────────────────────────────
-function save(k, v){ try{ localStorage.setItem('roi_'+k, JSON.stringify(v)); }catch(e){} }
-function load(k, def){ try{ const v=localStorage.getItem('roi_'+k); return v!==null?JSON.parse(v):def; }catch(e){ return def; } }
-
-// ─── Formatting ───────────────────────────────────────────────
-const fmt = n => typeof n==='number' ? n.toLocaleString('fr-FR') : '—';
-const fmtEur = n => typeof n==='number'&&n>0 ? n.toLocaleString('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}) : '—';
-const fmtPct = n => typeof n==='number'&&isFinite(n) ? n.toFixed(1)+'%' : '—';
-const fmtRoi = n => typeof n==='number'&&isFinite(n) ? (n>=0?'+':'')+Math.round(n)+'%' : '—';
-
-// ─── API ──────────────────────────────────────────────────────
-async function apiCall(endpoint, params={}) {
-  const qs = new URLSearchParams({ endpoint, ...params });
-  const r = await fetch(`/api/pipedrive?${qs}`);
-  const d = await r.json();
-  if (!d.success && d.error) throw new Error(d.error);
-  return d;
+function rb(roi){
+  if(roi==null)return'<span class="badge" style="background:var(--bg2);color:var(--text2)">—</span>';
+  if(roi>=500)return`<span class="badge bg">${fR(roi)}</span>`;
+  if(roi>=0)return`<span class="badge bb">${fR(roi)}</span>`;
+  return`<span class="badge br">${fR(roi)}</span>`;
 }
 
-const DATA_START = load('dataStart', '2025-11-01');
-
-async function fetchAllDeals() {
-  let all = [], start = 0;
-  while(true) {
-    const d = await apiCall('deals', {
-      status: 'all_not_deleted',
-      limit: 500,
-      start
-    });
-    if (!d.data) break;
-    // Garde uniquement les deals depuis nov 2025
-    const filtered = d.data.filter(deal => {
-      const date = (deal.add_time || '').substring(0, 10);
-      return date >= DATA_START;
-    });
-    all = all.concat(filtered);
-    // Si tous les deals de la page sont plus anciens, on arrête la pagination
-    const oldest = d.data.reduce((min, deal) => {
-      const date = (deal.add_time || '').substring(0, 10);
-      return date < min ? date : min;
-    }, '9999-99-99');
-    if (oldest < DATA_START) break;
-    if (!d.additional_data?.pagination?.more_items_in_collection) break;
-    start += 500;
-  }
-  return all;
-}
-
-async function fetchPersonEmails(personIds) {
-  // On récupère les emails en batch via /persons avec filter
-  // Pour éviter des centaines d'appels, on utilise person_id directement depuis les deals
-  // L'email est dans deal.person_id.email si Pipedrive le retourne, sinon on skip
-  return {};
-}
-
-async function fetchFields() {
-  const d = await apiCall('dealFields', { limit: 200 });
-  return d.data || [];
-}
-
-async function fetchPipelines() {
-  const d = await apiCall('pipelines', { limit: 100 });
-  return d.data || [];
-}
-
-function normalizeName(str) {
-  return (str || '').toLowerCase()
-    .normalize('NFD').replace(/[̀-ͯ]/g, '')
-    .trim();
-}
-
-function getKeptPipelineIds(pipelines) {
-  const KEPT = ['sales', 'autres financements', 'autre financement'];
-  return pipelines
-    .filter(p => KEPT.some(k => normalizeName(p.name).includes(k)))
-    .map(p => p.id);
-}
-
-// ─── Data Processing ──────────────────────────────────────────
-function buildFieldMap(fields) {
-  const map = {};
-  for (const f of fields) map[f.key] = f.name;
-  return map;
-}
-
-function getField(deal, fields, namePart) {
-  const np = namePart.toLowerCase();
-  const entry = Object.entries(fields).find(([k,v]) => v.toLowerCase().includes(np));
-  return entry ? deal[entry[0]] : null;
-}
-
-function getUtm(deal, fields, utmKey) {
-  // Try direct key first
-  if (deal[utmKey] !== undefined) return deal[utmKey] || '';
-  // Try by field name
-  const entry = Object.entries(fields).find(([k,v]) => v.toLowerCase() === utmKey.toLowerCase());
-  if (entry) return deal[entry[0]] || '';
-  return '';
-}
-
-function detectChannel(deal, fields) {
-  const src = (getUtm(deal, fields, 'utm_source') || '').toLowerCase();
-  if (src.includes('maformation')) return 'maformation';
-  if (src.includes('google')) return 'google';
-  if (src === 'organic' || src.includes('organic') || src === 'seo') return 'organic';
-  if (src) return src;
-  return 'other';
-}
-
-function isPotentiel(deal, fields) {
-  const med = (getUtm(deal, fields, 'utm_medium') || '').toLowerCase();
-  return med === 'potentiel' || med.includes('potentiel');
-}
-
-function isRdvIClosed(deal, fields) {
-  const med = (getUtm(deal, fields, 'utm_medium') || '').toLowerCase();
-  return med.includes('rdv') && (med.includes('iclosed') || med.includes('closed'));
-}
-
-function deduplicatePotentiel(deals, fields, emailMap) {
-  const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
-  const removed = new Set();
-
-  const potentiels = deals.filter(d => isPotentiel(d, fields));
-  const rdvs = deals.filter(d => isRdvIClosed(d, fields));
-
-  for (const pot of potentiels) {
-    const personId = pot.person_id?.value;
-    const potName = (pot.person_id?.name || pot.title || '').toLowerCase().trim();
-    const potDate = new Date(pot.add_time).getTime();
-
-    const match = rdvs.find(rdv => {
-      const rdvPersonId = rdv.person_id?.value;
-      const rdvName = (rdv.person_id?.name || rdv.title || '').toLowerCase().trim();
-      const rdvDate = new Date(rdv.add_time).getTime();
-      const withinWindow = Math.abs(rdvDate - potDate) <= SEVEN_DAYS_MS;
-      // Match par person_id (même contact lié) OU par nom si person_id absent
-      const sameContact = personId && rdvPersonId && personId === rdvPersonId;
-      const sameName = !personId && !rdvPersonId && potName && potName === rdvName;
-      return withinWindow && (sameContact || sameName);
-    });
-
-    if (match) removed.add(pot.id);
-  }
-
-  APP.dedupStats = { removed: removed.size, total: potentiels.length };
-  return deals.filter(d => !removed.has(d.id));
-}
-
-function processDeal(deal, fields, costs) {
-  const channel = detectChannel(deal, fields);
-  const campaign = getUtm(deal, fields, 'utm_campaign') || '(Non renseigné)';
-  const medium = getUtm(deal, fields, 'utm_medium') || '';
-  const isWon = deal.status === 'won';
-  const ca = isWon ? (parseFloat(deal.value) || 0) : 0;
-  const month = (deal.add_time || '').substring(0, 7);
-  const closeMonth = (deal.won_time || '').substring(0, 7);
-
-  // CPL : champ custom sur le deal, sinon fallback config
-  let cpl = 0;
-  const cplRaw = getField(deal, fields, 'cpl') || getField(deal, fields, 'coût par lead');
-  if (cplRaw) {
-    cpl = parseFloat(cplRaw) || 0;
-  } else {
-    cpl = costs[channel]?.cpl || 0;
-  }
-
-  const pipelineName = APP.pipelineNames[deal.pipeline_id] || 'Inconnu';
-  const stageName = deal.stage_id ? (deal.active_flag ? 'actif' : 'inactif') : '';
-  return { id: deal.id, title: deal.title || '', channel, campaign, medium, isWon, ca, month, closeMonth, cpl, pipelineName, raw: deal };
-}
-
-function computeStats(deals) {
-  const leads = deals.length;
-  const wons = deals.filter(d => d.isWon);
-  const dealsCount = wons.length;
-  const ca = wons.reduce((s, d) => s + d.ca, 0);
-  const taux = leads > 0 ? (dealsCount / leads * 100) : 0;
-  const panier = dealsCount > 0 ? (ca / dealsCount) : 0;
-  const totalCost = deals.reduce((s, d) => s + d.cpl, 0);
-  const benefice = ca - totalCost;
-  const roi = totalCost > 0 ? ((benefice / totalCost) * 100) : null;
-  return { leads, dealsCount, ca, taux, panier, totalCost, benefice, roi };
-}
-
-function groupBy(deals, key) {
-  const map = {};
-  for (const d of deals) {
-    const k = d[key] || '(Non renseigné)';
-    if (!map[k]) map[k] = [];
-    map[k].push(d);
-  }
-  return map;
-}
-
-// ─── Load Data ────────────────────────────────────────────────
-async function loadData() {
-  setSyncStatus('loading', 'Chargement...');
-  APP.loading = true;
-  APP.error = null;
-  render();
-
-  try {
-    setSyncStatus('loading', 'Chargement des pipelines et deals...');
-    const [rawDeals, rawFields, pipelines] = await Promise.all([fetchAllDeals(), fetchFields(), fetchPipelines()]);
-    APP.fields = buildFieldMap(rawFields);
-    APP.keptPipelineIds = getKeptPipelineIds(pipelines);
-    APP.pipelineNames = Object.fromEntries(pipelines.map(p => [p.id, p.name]));
-
-    setSyncStatus('loading', 'Filtrage des pipelines...');
-    const emailMap = {};
-    const pipelineFiltered = APP.keptPipelineIds.length > 0
-      ? rawDeals.filter(d => APP.keptPipelineIds.includes(d.pipeline_id))
-      : rawDeals;
-    APP.excludedCount = rawDeals.length - pipelineFiltered.length;
-
-    setSyncStatus('loading', 'Dédoublonnage...');
-    const deduped = deduplicatePotentiel(pipelineFiltered, APP.fields, emailMap);
-    APP.deals = deduped.map(d => processDeal(d, APP.fields, APP.costs));
-    APP.lastSync = new Date().toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'});
-    save('cache', { deals: APP.deals, ts: Date.now() });
-    setSyncStatus('ok', `Sync ${APP.lastSync} · ${APP.deals.length} leads`);
-  } catch(e) {
-    APP.error = e.message;
-    setSyncStatus('error', 'Erreur de connexion');
-  }
-
-  APP.loading = false;
+function setView(v){
+  A.view=v;
+  document.querySelectorAll('.ni').forEach(el=>el.classList.remove('active'));
+  ['global','monthly','campaign','import'].forEach((x,i)=>{if(x===v)document.querySelectorAll('.ni')[i]?.classList.add('active');});
   render();
 }
 
-function setSyncStatus(state, label) {
-  const dot = document.getElementById('sync-dot');
-  const lbl = document.getElementById('sync-label');
-  if (!dot) return;
-  dot.className = 'sync-dot' + (state === 'loading' ? ' loading' : state === 'error' ? ' error' : '');
-  lbl.textContent = label;
+function loadJSON(txt){
+  try{
+    A.data=JSON.parse(txt);
+    document.getElementById('slbl').textContent=`Maj ${A.data.generated_at}`;
+    document.getElementById('sch').textContent=A.data.channel||'Dashboard';
+    setView('global');
+  }catch(e){alert('JSON invalide: '+e.message);}
 }
 
-// ─── Channel helpers ──────────────────────────────────────────
-const CHANNEL_LABELS = { maformation:'MaFormation', google:'Google Ads', organic:'SEO / Organique', other:'Autres' };
-const channelLabel = ch => CHANNEL_LABELS[ch] || ch;
-const channelClass = ch => ({ maformation:'ch-maformation', google:'ch-google', organic:'ch-organic' }[ch] || 'ch-other');
-const channelBadge = ch => `<span class="badge ${channelClass(ch)}">${channelLabel(ch)}</span>`;
-
-function roiBadge(roi) {
-  if (roi === null) return '<span class="badge badge-gray">—</span>';
-  if (roi >= 300) return `<span class="badge badge-green">${fmtRoi(roi)}</span>`;
-  if (roi >= 0) return `<span class="badge badge-blue">${fmtRoi(roi)}</span>`;
-  return `<span class="badge badge-red">${fmtRoi(roi)}</span>`;
+function rImport(){
+  return`<div class="topbar"><div><div class="ttitle">Importer les données</div><div class="tsub">Glissez le fichier JSON généré par Claude</div></div></div>
+  <div class="izone" id="dz" onclick="document.getElementById('fi').click()">
+    <div class="spin"></div>
+    <h3>Déposer le fichier pipedrive_data.json</h3>
+    <p>Glissez-déposez le fichier ici, ou cliquez pour le sélectionner.<br>Généré par Claude à partir de vos exports CSV Pipedrive.</p>
+    <button class="btn p" onclick="event.stopPropagation();document.getElementById('fi').click()">Choisir un fichier</button>
+    <input type="file" id="fi" accept=".json" style="display:none" onchange="handleF(this)">
+  </div>
+  <div style="margin-top:16px;padding:16px;background:var(--bg);border:.5px solid var(--border);border-radius:var(--rl);font-size:13px;color:var(--text2);line-height:1.8">
+    <strong style="color:var(--text)">Comment mettre à jour :</strong><br>
+    1. Exportez vos CSV depuis Pipedrive (Prospects + Affaires avec archivés)<br>
+    2. Envoyez-les à Claude : <em>"Mets à jour le dashboard"</em><br>
+    3. Claude génère un nouveau <code>pipedrive_data.json</code><br>
+    4. Importez-le ici — mise à jour instantanée
+  </div>`;
 }
 
-// ─── Navigation ───────────────────────────────────────────────
-function setView(v) {
-  APP.view = v;
-  document.querySelectorAll('.nav-item').forEach(el => {
-    el.classList.toggle('active', el.dataset.view === v);
-  });
-  render();
+function rGlobal(){
+  const t=A.data.totals,m=A.data.monthly;
+  const dk=matchMedia('(prefers-color-scheme:dark)').matches;
+  const tc=dk?'#9e9c96':'#6b6b66',gc=dk?'rgba(255,255,255,.06)':'rgba(0,0,0,.05)';
+  const labels=m.map(r=>r.month),caD=m.map(r=>r.ca),lD=m.map(r=>r.nb_leads),cD=m.map(r=>r.cout_ttc);
+  return`
+  <div class="topbar"><div><div class="ttitle">Vue globale · MaFormation</div><div class="tsub">Depuis ${A.data.data_start} · Coûts TTC (TVA 20%)</div></div></div>
+  <div class="kgrid">
+    <div class="kcard bl"><div class="klbl">Leads totaux</div><div class="kval">${fN(t.nb_leads)}</div><div class="ksub">prospects + affaires</div></div>
+    <div class="kcard pos"><div class="klbl">Deals gagnés</div><div class="kval">${fN(t.nb_deals_gagnes)}</div><div class="ksub">${fP(t.nb_deals_gagnes/t.nb_leads*100)} conv.</div></div>
+    <div class="kcard"><div class="klbl">CA total</div><div class="kval" style="font-size:20px">${fE(t.ca)}</div><div class="ksub">panier ${fE(t.panier_moyen)}</div></div>
+    <div class="kcard"><div class="klbl">Coût TTC</div><div class="kval" style="font-size:20px">${fE(t.cout_ttc)}</div><div class="ksub">HT ${fE(t.cout_ht)}</div></div>
+    <div class="kcard pos"><div class="klbl">Bénéfice net</div><div class="kval" style="font-size:20px">${fE(t.benefice_net)}</div></div>
+    <div class="kcard pos"><div class="klbl">ROI</div><div class="kval">${fR(t.roi)}</div><div class="ksub">sur coût TTC</div></div>
+  </div>
+  <div class="sec"><div class="sh"><span class="st">CA mensuel (par date de gain)</span></div><div class="cw" style="height:220px"><canvas id="cc"></canvas></div></div>
+  <div class="sec"><div class="sh"><span class="st">Leads & coût TTC par mois</span></div><div class="cw" style="height:200px"><canvas id="cl"></canvas></div></div>
+  <script>(function(){
+    const tc='${tc}',gc='${gc}',l=${JSON.stringify(labels)},ca=${JSON.stringify(caD)},ld=${JSON.stringify(lD)},cd=${JSON.stringify(cD)};
+    const bo={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tc,font:{size:11},maxRotation:45,autoSkip:true,maxTicksLimit:8},grid:{color:gc}},y:{ticks:{color:tc,font:{size:11}},grid:{color:gc}}}};
+    if(window._c1)window._c1.destroy();if(window._c2)window._c2.destroy();
+    window._c1=new Chart(document.getElementById('cc'),{type:'bar',data:{labels:l,datasets:[{data:ca,backgroundColor:'#378ADD',borderRadius:4}]},options:{...bo,scales:{...bo.scales,y:{...bo.scales.y,ticks:{...bo.scales.y.ticks,callback:v=>v>=1000?(v/1000).toFixed(0)+'k€':v+'€'}}}}});
+    window._c2=new Chart(document.getElementById('cl'),{type:'line',data:{labels:l,datasets:[{label:'Leads',data:ld,borderColor:'#378ADD',backgroundColor:'rgba(55,138,221,.12)',tension:.35,fill:true,pointRadius:3},{label:'Coût TTC',data:cd,borderColor:'#BA7517',backgroundColor:'rgba(186,117,23,.08)',tension:.35,fill:false,pointRadius:3,yAxisID:'y2'}]},options:{...bo,plugins:{legend:{display:true,labels:{color:tc,font:{size:12},boxWidth:10}}},scales:{...bo.scales,y2:{position:'right',ticks:{color:tc,font:{size:11},callback:v=>v>=1000?(v/1000).toFixed(0)+'k€':v+'€'},grid:{display:false}}}}});
+  })();<\/script>`;
 }
 
-// ─── Filtered deals ───────────────────────────────────────────
-function getFiltered() {
-  let d = APP.deals;
-  if (APP.filterChannel !== 'all') d = d.filter(x => x.channel === APP.filterChannel);
-  if (APP.filterMonth !== 'all') d = d.filter(x => x.month === APP.filterMonth);
-  return d;
+function rMonthly(){
+  const m=A.data.monthly;
+  return`<div class="topbar"><div><div class="ttitle">Par mois</div><div class="tsub">Leads créés · Deals gagnés par date de gain · Coûts TTC</div></div></div>
+  <div class="sec"><table>
+    <thead><tr><th>Mois</th><th>Leads</th><th style="font-size:10px;color:var(--text3)">prospects</th><th style="font-size:10px;color:var(--text3)">affaires</th><th>Gagnés</th><th>Taux conv.</th><th>CA</th><th>Panier</th><th>Coût HT</th><th>Coût TTC</th><th>Bénéfice</th><th>ROI</th></tr></thead>
+    <tbody>${m.map(r=>`<tr>
+      <td><strong>${r.month}</strong></td>
+      <td><strong>${fN(r.nb_leads)}</strong></td>
+      <td style="color:var(--text3)">${fN(r.nb_prospects_nc)}</td>
+      <td style="color:var(--text3)">${fN(r.nb_deals_crees)}</td>
+      <td>${fN(r.nb_deals_gagnes)}</td>
+      <td>${fP(r.nb_leads>0?r.nb_deals_gagnes/r.nb_leads*100:0)}</td>
+      <td>${fE(r.ca)}</td><td>${fE(r.panier_moyen)}</td>
+      <td style="color:var(--text2)">${fE(r.cout_ht)}</td>
+      <td>${fE(r.cout_ttc)}</td>
+      <td style="color:${r.benefice_net>=0?'var(--green)':'var(--red)'}">${fE(r.benefice_net)}</td>
+      <td>${rb(r.roi)}</td>
+    </tr>`).join('')}</tbody>
+  </table></div>`;
 }
 
-function getMonths() { return [...new Set(APP.deals.map(d => d.month).filter(Boolean))].sort(); }
-function getChannels() { return [...new Set(APP.deals.map(d => d.channel))].sort(); }
-
-// ─── Render ───────────────────────────────────────────────────
-function renderFilters() {
-  const months = getMonths();
-  const channels = getChannels();
-  return `
-    <div class="filters">
-      <select onchange="APP.filterChannel=this.value;render()">
-        <option value="all">Tous les canaux</option>
-        ${channels.map(c => `<option value="${c}" ${APP.filterChannel===c?'selected':''}>${channelLabel(c)}</option>`).join('')}
-      </select>
-      <select onchange="APP.filterMonth=this.value;render()">
-        <option value="all">Tous les mois</option>
-        ${months.map(m => `<option value="${m}" ${APP.filterMonth===m?'selected':''}>${m}</option>`).join('')}
-      </select>
-      <span class="filter-label">${getFiltered().length} leads · ${APP.deals.filter(d=>d.isWon).length} deals gagnés</span>
-      <button class="btn" onclick="loadData()">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-          <path d="M13.5 8A5.5 5.5 0 1 1 8 2.5M13.5 2.5v3h-3"/>
-        </svg>
-        Actualiser
-      </button>
-    </div>`;
+function rCampaign(){
+  const c=A.data.campaigns;
+  return`<div class="topbar"><div><div class="ttitle">Par campagne</div><div class="tsub">${c.length} campagnes · triées par CA</div></div></div>
+  <div class="sec"><table>
+    <thead><tr><th>Campagne</th><th>Leads</th><th>Gagnés</th><th>Taux</th><th>CA</th><th>Panier</th><th>Coût HT</th><th>Coût TTC</th><th>Bénéfice</th><th>ROI</th></tr></thead>
+    <tbody>${c.map(r=>`<tr>
+      <td class="tdt" title="${r.campaign}">${r.campaign}</td>
+      <td>${fN(r.nb_leads)}</td><td>${fN(r.nb_deals_gagnes)}</td>
+      <td>${fP(r.nb_leads>0?r.nb_deals_gagnes/r.nb_leads*100:0)}</td>
+      <td>${fE(r.ca)}</td><td>${fE(r.panier_moyen)}</td>
+      <td style="color:var(--text2)">${fE(r.cout_ht)}</td>
+      <td>${fE(r.cout_ttc)}</td>
+      <td style="color:${r.benefice_net>=0?'var(--green)':'var(--red)'}">${fE(r.benefice_net)}</td>
+      <td>${rb(r.roi)}</td>
+    </tr>`).join('')}</tbody>
+  </table></div>`;
 }
 
-function renderGlobal(deals) {
-  const s = computeStats(deals);
-  const byChannel = groupBy(deals, 'channel');
-  const rows = Object.entries(byChannel)
-    .map(([ch, dd]) => ({ ch, ...computeStats(dd) }))
-    .sort((a,b) => b.ca - a.ca);
-
-  const maxCA = Math.max(...rows.map(r => r.ca), 1);
-
-  return `
-    <div class="topbar">
-      <div><div class="topbar-title">Vue globale</div><div class="topbar-sub">Tous canaux confondus</div></div>
-    </div>
-    ${renderFilters()}
-    <div class="kpi-grid">
-      <div class="kpi-card neutral">
-        <div class="kpi-label">Leads totaux</div>
-        <div class="kpi-value">${fmt(s.leads)}</div>
-      </div>
-      <div class="kpi-card positive">
-        <div class="kpi-label">Deals gagnés</div>
-        <div class="kpi-value">${fmt(s.dealsCount)}</div>
-        <div class="kpi-sub">taux ${fmtPct(s.taux)}</div>
-      </div>
-      <div class="kpi-card neutral">
-        <div class="kpi-label">CA total</div>
-        <div class="kpi-value" style="font-size:20px">${fmtEur(s.ca)}</div>
-      </div>
-      <div class="kpi-card neutral">
-        <div class="kpi-label">Panier moyen</div>
-        <div class="kpi-value" style="font-size:20px">${fmtEur(s.panier)}</div>
-      </div>
-      <div class="kpi-card ${s.roi!==null&&s.roi>=0?'positive':'negative'}">
-        <div class="kpi-label">ROI global</div>
-        <div class="kpi-value">${fmtRoi(s.roi)}</div>
-        <div class="kpi-sub">coût ${fmtEur(s.totalCost)}</div>
-      </div>
-      <div class="kpi-card ${s.benefice>0?'positive':'negative'}">
-        <div class="kpi-label">Bénéfice net</div>
-        <div class="kpi-value" style="font-size:20px">${fmtEur(s.benefice)}</div>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-header">
-        <span class="section-title">Performance par canal</span>
-      </div>
-      <table>
-        <thead><tr>
-          <th>Canal</th><th>Leads</th><th>Deals</th><th>Taux conv.</th>
-          <th>CA</th><th>Panier moy.</th><th>Coût acq.</th><th>Bénéfice</th><th>ROI</th>
-        </tr></thead>
-        <tbody>
-          ${rows.map(r => `<tr>
-            <td>${channelBadge(r.ch)}</td>
-            <td>${fmt(r.leads)}</td><td>${fmt(r.dealsCount)}</td>
-            <td>${fmtPct(r.taux)}</td><td>${fmtEur(r.ca)}</td>
-            <td>${fmtEur(r.panier)}</td><td>${fmtEur(r.totalCost)}</td>
-            <td style="color:${r.benefice>=0?'var(--green)':'var(--red)'}">${fmtEur(r.benefice)}</td>
-            <td>${roiBadge(r.roi)}</td>
-          </tr>`).join('')}
-        </tbody>
-      </table>
-    </div>
-
-    <div class="section">
-      <div class="section-header"><span class="section-title">CA par canal</span></div>
-      ${rows.map(r => `
-        <div style="margin-bottom:14px">
-          <div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:13px">
-            <span>${channelBadge(r.ch)}</span>
-            <span style="color:var(--text2)">${fmtEur(r.ca)} · ${fmt(r.leads)} leads</span>
-          </div>
-          <div class="progress"><div class="progress-fill" style="width:${Math.round(r.ca/maxCA*100)}%"></div></div>
-        </div>`).join('')}
-    </div>`;
+function render(){
+  const main=document.getElementById('main');
+  if(!A.data&&A.view!=='import'){setView('import');return;}
+  if(A.view==='import'){main.innerHTML=rImport();setupDrop();return;}
+  if(A.view==='global')main.innerHTML=rGlobal();
+  else if(A.view==='monthly')main.innerHTML=rMonthly();
+  else if(A.view==='campaign')main.innerHTML=rCampaign();
+  main.querySelectorAll('script').forEach(s=>{const ns=document.createElement('script');ns.textContent=s.textContent;s.replaceWith(ns);});
 }
 
-function renderChannel(deals) {
-  const byChannel = groupBy(deals, 'channel');
-  const sorted = Object.entries(byChannel).sort((a,b) => computeStats(b[1]).ca - computeStats(a[1]).ca);
-
-  return `
-    <div class="topbar">
-      <div><div class="topbar-title">Par canal</div><div class="topbar-sub">Détail des campagnes par source</div></div>
-    </div>
-    ${renderFilters()}
-    ${sorted.map(([ch, dd]) => {
-      const s = computeStats(dd);
-      const byCampaign = groupBy(dd, 'campaign');
-      const campRows = Object.entries(byCampaign)
-        .map(([c, cd]) => ({ c, ...computeStats(cd) }))
-        .sort((a,b) => b.ca - a.ca);
-
-      return `<div class="section">
-        <div class="section-header">
-          <span class="section-title">${channelBadge(ch)}</span>
-          <span class="section-sub">${fmt(s.leads)} leads · ${fmtEur(s.ca)} · ROI ${fmtRoi(s.roi)}</span>
-        </div>
-        <table>
-          <thead><tr><th>Campagne</th><th>Leads</th><th>Deals</th><th>Conv.</th><th>CA</th><th>Panier</th><th>ROI</th></tr></thead>
-          <tbody>
-            ${campRows.map(r => `<tr>
-              <td class="td-truncate" title="${r.c}">${r.c}</td>
-              <td>${fmt(r.leads)}</td><td>${fmt(r.dealsCount)}</td>
-              <td>${fmtPct(r.taux)}</td><td>${fmtEur(r.ca)}</td>
-              <td>${fmtEur(r.panier)}</td><td>${roiBadge(r.roi)}</td>
-            </tr>`).join('')}
-          </tbody>
-        </table>
-      </div>`;
-    }).join('')}`;
+function handleF(input){
+  const f=input.files[0];if(!f)return;
+  const r=new FileReader();r.onload=e=>loadJSON(e.target.result);r.readAsText(f);
 }
 
-function renderCampaign(deals) {
-  const byCampaign = groupBy(deals, 'campaign');
-  const rows = Object.entries(byCampaign)
-    .map(([c, dd]) => {
-      const ch = dd[0]?.channel || 'other';
-      return { c, ch, ...computeStats(dd) };
-    })
-    .sort((a,b) => b.ca - a.ca);
-
-  return `
-    <div class="topbar">
-      <div><div class="topbar-title">Par campagne</div><div class="topbar-sub">${rows.length} campagnes actives</div></div>
-    </div>
-    ${renderFilters()}
-    <div class="section">
-      <table>
-        <thead><tr>
-          <th>Campagne</th><th>Canal</th><th>Leads</th><th>Deals</th>
-          <th>Conv.</th><th>CA</th><th>Panier moy.</th><th>Coût acq.</th><th>ROI</th>
-        </tr></thead>
-        <tbody>
-          ${rows.map(r => `<tr>
-            <td class="td-truncate" style="max-width:240px" title="${r.c}">${r.c}</td>
-            <td>${channelBadge(r.ch)}</td>
-            <td>${fmt(r.leads)}</td><td>${fmt(r.dealsCount)}</td>
-            <td>${fmtPct(r.taux)}</td><td>${fmtEur(r.ca)}</td>
-            <td>${fmtEur(r.panier)}</td><td>${fmtEur(r.totalCost)}</td>
-            <td>${roiBadge(r.roi)}</td>
-          </tr>`).join('')}
-        </tbody>
-      </table>
-    </div>`;
+function setupDrop(){
+  const z=document.getElementById('dz');if(!z)return;
+  z.addEventListener('dragover',e=>{e.preventDefault();z.classList.add('drag');});
+  z.addEventListener('dragleave',()=>z.classList.remove('drag'));
+  z.addEventListener('drop',e=>{e.preventDefault();z.classList.remove('drag');const f=e.dataTransfer.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>loadJSON(ev.target.result);r.readAsText(f);});
 }
 
-function renderMonthly(deals) {
-  const byMonth = groupBy(deals, 'month');
-  const months = Object.keys(byMonth).filter(Boolean).sort();
-  const rows = months.map(m => ({ m, ...computeStats(byMonth[m]) }));
-  const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
-  const textColor = isDark ? '#9e9c96' : '#6b6b66';
-  const gridColor = isDark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.05)';
-
-  return `
-    <div class="topbar">
-      <div><div class="topbar-title">Par mois</div><div class="topbar-sub">Évolution mensuelle</div></div>
-    </div>
-    ${renderFilters()}
-
-    <div class="section">
-      <div class="section-header"><span class="section-title">CA mensuel</span></div>
-      <div class="chart-wrap" style="height:220px"><canvas id="chart-ca"></canvas></div>
-    </div>
-
-    <div class="section">
-      <div class="section-header"><span class="section-title">Leads & deals mensuels</span></div>
-      <div class="chart-wrap" style="height:200px"><canvas id="chart-leads"></canvas></div>
-    </div>
-
-    <div class="section">
-      <div class="section-header"><span class="section-title">Tableau mensuel</span></div>
-      <table>
-        <thead><tr>
-          <th>Mois</th><th>Leads</th><th>Deals</th><th>Conv.</th>
-          <th>CA</th><th>Panier moy.</th><th>Coût acq.</th><th>Bénéfice</th><th>ROI</th>
-        </tr></thead>
-        <tbody>
-          ${rows.map(r => `<tr>
-            <td><strong>${r.m}</strong></td>
-            <td>${fmt(r.leads)}</td><td>${fmt(r.dealsCount)}</td>
-            <td>${fmtPct(r.taux)}</td><td>${fmtEur(r.ca)}</td>
-            <td>${fmtEur(r.panier)}</td><td>${fmtEur(r.totalCost)}</td>
-            <td style="color:${r.benefice>=0?'var(--green)':'var(--red)'}">${fmtEur(r.benefice)}</td>
-            <td>${roiBadge(r.roi)}</td>
-          </tr>`).join('')}
-        </tbody>
-      </table>
-    </div>
-
-    <script>
-    (function(){
-      const labels = ${JSON.stringify(months)};
-      const caData = ${JSON.stringify(rows.map(r=>r.ca))};
-      const leadsData = ${JSON.stringify(rows.map(r=>r.leads))};
-      const dealsData = ${JSON.stringify(rows.map(r=>r.dealsCount))};
-      const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
-      const tc = isDark ? '#9e9c96' : '#6b6b66';
-      const gc = isDark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.05)';
-      const baseOpts = {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          x: { ticks: { color: tc, font:{size:11}, autoSkip:true, maxTicksLimit:10, maxRotation:45 }, grid: { color: gc } },
-          y: { ticks: { color: tc, font:{size:11} }, grid: { color: gc } }
-        }
-      };
-
-      if (window._chartCA) window._chartCA.destroy();
-      if (window._chartLeads) window._chartLeads.destroy();
-
-      window._chartCA = new Chart(document.getElementById('chart-ca'), {
-        type: 'bar',
-        data: { labels, datasets: [{ data: caData, backgroundColor: '#378ADD', borderRadius: 4 }] },
-        options: { ...baseOpts, scales: { ...baseOpts.scales, y: { ...baseOpts.scales.y,
-          ticks: { ...baseOpts.scales.y.ticks, callback: v => v>=1000 ? (v/1000).toFixed(0)+'k€' : v+'€' }
-        }}}
-      });
-
-      window._chartLeads = new Chart(document.getElementById('chart-leads'), {
-        type: 'line',
-        data: { labels, datasets: [
-          { label:'Leads', data: leadsData, borderColor:'#378ADD', backgroundColor:'rgba(55,138,221,.12)', tension:.35, fill:true, pointRadius:3 },
-          { label:'Deals', data: dealsData, borderColor:'#1D9E75', backgroundColor:'rgba(29,158,117,.12)', tension:.35, fill:true, pointRadius:3 }
-        ]},
-        options: { ...baseOpts, plugins: { legend: { display: true, labels: { color: tc, font:{size:12}, boxWidth:10, boxHeight:10 } } } }
-      });
-    })();
-    <\/script>`;
-}
-
-function renderSettings() {
-  const channels = ['maformation','google','organic','other'];
-  return `
-    <div class="topbar">
-      <div><div class="topbar-title">Réglages</div><div class="topbar-sub">Configuration du dashboard</div></div>
-    </div>
-
-    <div class="settings-group">
-      <h3>Coûts d'acquisition par canal</h3>
-      <p>CPL moyen appliqué si le champ CPL n'est pas renseigné sur le deal Pipedrive.</p>
-      ${channels.map(ch => `
-        <div class="form-row">
-          <label>${channelLabel(ch)}</label>
-          <input type="number" min="0" step="0.5" value="${APP.costs[ch]?.cpl||0}"
-            onchange="APP.costs['${ch}']={...APP.costs['${ch}'],cpl:parseFloat(this.value)||0}"
-            placeholder="CPL €">
-          <span>€ / lead</span>
-        </div>`).join('')}
-      <button class="btn primary" style="margin-top:8px" onclick="save('costs',APP.costs);APP.deals=APP.deals.map(d=>processDeal(d.raw,APP.fields,APP.costs));render()">
-        Sauvegarder les coûts
-      </button>
-    </div>
-
-    <div class="settings-group">
-      <h3>Gestion des doublons "Potentiel"</h3>
-      <p>Les leads avec utm_medium = "potentiel" sont automatiquement fusionnés avec le RDV iClosed du même contact. S'il n'existe pas de RDV associé, le lead Potentiel est conservé.</p>
-      <div style="font-size:13px;color:var(--green);font-weight:500">
-        Dédoublonnage actif · ${APP.dedupStats ? APP.dedupStats.removed + ' Potentiel(s) supprimé(s) sur ' + APP.dedupStats.total + ' détectés' : 'données non encore chargées'}
-      </div>
-      <div style="font-size:12px;color:var(--text3);margin-top:6px">
-        Règle : email identique + fenêtre de 7 jours · le RDV iClosed est conservé
-      </div>
-    </div>
-
-    <div class="settings-group">
-      <h3>Période d'analyse</h3>
-      <p>Seuls les deals créés depuis cette date sont chargés. Défaut : novembre 2025 (début du tracking UTM).</p>
-      <div class="form-row">
-        <label>Date de début</label>
-        <input type="date" value="${load('dataStart','2025-11-01')}" id="data-start-input"
-          onchange="save('dataStart', this.value); location.reload()">
-      </div>
-    </div>
-
-    <div class="settings-group">
-      <h3>Filtrage des pipelines</h3>
-      <p>Seuls les deals des pipelines SALES et Autres Financements sont inclus. Le pipeline CSM et tous les autres sont exclus.</p>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-        ${APP.keptPipelineIds.map(id => `
-          <span style="font-size:12px;padding:3px 10px;border-radius:20px;background:var(--green-bg);color:var(--green-text);font-weight:500">
-            ${APP.pipelineNames[id] || id}
-          </span>`).join('')}
-      </div>
-      <div style="font-size:13px;color:var(--text2)">
-        ${APP.excludedCount > 0
-          ? `<span style="color:var(--amber)">${APP.excludedCount} deal(s) exclus</span> (pipelines hors périmètre)`
-          : 'Aucun deal exclu pour l'instant'}
-      </div>
-    </div>
-
-    <div class="settings-group">
-      <h3>Variable d'environnement Pipedrive</h3>
-      <p>Le token API est stocké en variable d'environnement Vercel <code>PIPEDRIVE_TOKEN</code> — jamais exposé côté client. Pour le modifier, rendez-vous dans votre dashboard Vercel → Settings → Environment Variables.</p>
-      <div style="font-size:13px;font-family:monospace;background:var(--bg3);padding:8px 12px;border-radius:var(--radius);color:var(--text2)">PIPEDRIVE_TOKEN = ••••••••••••••••••</div>
-    </div>`;
-}
-
-// ─── Main render ──────────────────────────────────────────────
-function render() {
-  const main = document.getElementById('main');
-  if (!main) return;
-
-  if (APP.loading) {
-    main.innerHTML = `<div class="loading-screen"><div class="loading-spinner"></div><p style="color:var(--text2)">Chargement depuis Pipedrive...</p></div>`;
-    return;
-  }
-
-  if (APP.error) {
-    main.innerHTML = `
-      <div class="topbar"><div><div class="topbar-title">Erreur de connexion</div></div></div>
-      <div class="error-box">${APP.error}</div>
-      <button class="btn primary" onclick="loadData()">Réessayer</button>`;
-    return;
-  }
-
-  const filtered = getFiltered();
-
-  let content = '';
-  if (APP.view === 'global') content = renderGlobal(filtered);
-  else if (APP.view === 'channel') content = renderChannel(filtered);
-  else if (APP.view === 'campaign') content = renderCampaign(filtered);
-  else if (APP.view === 'monthly') content = renderMonthly(filtered);
-  else if (APP.view === 'settings') content = renderSettings();
-
-  main.innerHTML = content;
-
-  // Execute injected scripts (charts)
-  main.querySelectorAll('script').forEach(s => {
-    const ns = document.createElement('script');
-    ns.textContent = s.textContent;
-    s.replaceWith(ns);
-  });
-}
-
-// ─── Init ─────────────────────────────────────────────────────
-APP.costs = load('costs', { maformation:{cpl:25}, google:{cpl:0}, organic:{cpl:0}, other:{cpl:0} });
 render();
-loadData();
 </script>
 </body>
 </html>
