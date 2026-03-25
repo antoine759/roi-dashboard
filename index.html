@@ -148,6 +148,41 @@ function rb(roi) {
   return `<span class="badge br">${fR(roi)}</span>`;
 }
 
+function buildCampHeaders() {
+  const thead = document.getElementById('camp-thead');
+  if (!thead) return;
+  const cols = [
+    {key:'campaign', label:'Campagne'},
+    {key:'nb_leads', label:'Leads'},
+    {key:'nb_deals_gagnes', label:'Gagnés'},
+    {key:'taux', label:'Taux'},
+    {key:'ca', label:'CA'},
+    {key:'panier_moyen', label:'Panier'},
+    {key:'cout_ht', label:'Coût HT'},
+    {key:'cout_ttc', label:'Coût TTC'},
+    {key:'cpl_reel', label:'CPL réel'},
+    {key:'cac_reel', label:'CAC réel'},
+    {key:'benefice_net', label:'Bénéfice'},
+    {key:'roi', label:'ROI'},
+  ];
+  const tr = thead.querySelector('tr');
+  tr.innerHTML = '';
+  cols.forEach(({key, label}) => {
+    const th = document.createElement('th');
+    th.style.cursor = 'pointer';
+    th.style.whiteSpace = 'nowrap';
+    th.style.userSelect = 'none';
+    const isActive = A.sort.key === key;
+    const icon = isActive
+      ? (A.sort.dir === 'desc' ? ' ▼' : ' ▲')
+      : ' ⇅';
+    th.textContent = label + icon;
+    if (isActive) th.style.color = 'var(--blue)';
+    th.onclick = () => sortBy(key);
+    tr.appendChild(th);
+  });
+}
+
 function sortBy(key) {
   if (A.sort.key === key) {
     A.sort.dir = A.sort.dir === 'desc' ? 'asc' : 'desc';
@@ -159,10 +194,10 @@ function sortBy(key) {
 }
 
 function sortIcon(key) {
-  if (A.sort.key !== key) return '<span style="color:var(--text3);font-size:10px;margin-left:3px">⇅</span>';
+  if (A.sort.key !== key) return ' <span style="opacity:.35;font-size:9px">⇅</span>';
   return A.sort.dir === 'desc'
-    ? '<span style="color:var(--blue);font-size:10px;margin-left:3px">↓</span>'
-    : '<span style="color:var(--blue);font-size:10px;margin-left:3px">↑</span>';
+    ? ' <span style="color:var(--blue);font-size:9px">▼</span>'
+    : ' <span style="color:var(--blue);font-size:9px">▲</span>';
 }
 
 function sortedCampaigns() {
@@ -421,20 +456,7 @@ function rCampaign() {
     <div class="tsub">${c.length} campagnes · triées par CA${hasPeriodFilter?' · <span style="color:var(--amber)">filtre période non appliqué aux campagnes</span>':''}</div></div></div>
     ${c.length === 0 ? '<div class="empty">Aucune campagne pour cette sélection.</div>' : `
     <div class="sec"><table>
-      <thead><tr>
-        <th onclick="sortBy('campaign')" style="cursor:pointer">Campagne${sortIcon('campaign')}</th>
-        <th onclick="sortBy('nb_leads')" style="cursor:pointer">Leads${sortIcon('nb_leads')}</th>
-        <th onclick="sortBy('nb_deals_gagnes')" style="cursor:pointer">Gagnés${sortIcon('nb_deals_gagnes')}</th>
-        <th onclick="sortBy('taux')" style="cursor:pointer">Taux${sortIcon('taux')}</th>
-        <th onclick="sortBy('ca')" style="cursor:pointer">CA${sortIcon('ca')}</th>
-        <th onclick="sortBy('panier_moyen')" style="cursor:pointer">Panier${sortIcon('panier_moyen')}</th>
-        <th onclick="sortBy('cout_ht')" style="cursor:pointer">Coût HT${sortIcon('cout_ht')}</th>
-        <th onclick="sortBy('cout_ttc')" style="cursor:pointer">Coût TTC${sortIcon('cout_ttc')}</th>
-        <th onclick="sortBy('cpl_reel')" style="cursor:pointer">CPL réel${sortIcon('cpl_reel')}</th>
-        <th onclick="sortBy('cac_reel')" style="cursor:pointer">CAC réel${sortIcon('cac_reel')}</th>
-        <th onclick="sortBy('benefice_net')" style="cursor:pointer">Bénéfice${sortIcon('benefice_net')}</th>
-        <th onclick="sortBy('roi')" style="cursor:pointer">ROI${sortIcon('roi')}</th>
-      </tr></thead>
+      <thead id="camp-thead"><tr></tr></thead>
       <tbody>${c.map(r=>`<tr>
         <td class="tdt" title="${r.campaign}">${r.campaign}</td>
         <td>${fN(r.nb_leads)}</td><td>${fN(r.nb_deals_gagnes)}</td>
@@ -470,6 +492,7 @@ function render() {
   });
 
   if (A.view === 'import') setupDrop();
+  if (A.view === 'campaign') buildCampHeaders();
 
   // Mettre à jour le compteur de résultats
   const fc = document.getElementById('filter-count');
