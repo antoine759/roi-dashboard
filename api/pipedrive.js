@@ -12,18 +12,19 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'PIPEDRIVE_TOKEN non configuré dans les variables d\'environnement Vercel.' });
   }
 
-  const { endpoint, ...params } = req.query;
+  const { endpoint, id, ...params } = req.query;
   if (!endpoint) {
     return res.status(400).json({ error: 'Paramètre endpoint manquant.' });
   }
 
-  const allowed = ['deals', 'dealFields', 'persons', 'organizations'];
+  const allowed = ['deals', 'dealFields', 'persons', 'organizations', 'pipelines', 'stages'];
   if (!allowed.includes(endpoint)) {
     return res.status(400).json({ error: 'Endpoint non autorisé.' });
   }
 
   const queryParams = new URLSearchParams({ ...params, api_token: token });
-  const url = `https://api.pipedrive.com/v1/${endpoint}?${queryParams}`;
+  const path = id ? `${endpoint}/${id}` : endpoint;
+  const url = `https://api.pipedrive.com/v1/${path}?${queryParams}`;
 
   try {
     const response = await fetch(url);
