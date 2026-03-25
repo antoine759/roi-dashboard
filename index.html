@@ -351,11 +351,29 @@ async function apiCall(endpoint, params={}) {
   return d;
 }
 
+const DATA_START = load('dataStart', '2025-11-01');
+
 async function fetchAllDeals() {
   let all = [], start = 0;
   while(true) {
-    const d = await apiCall('deals', { status:'all_not_deleted', limit:500, start });
-    if (d.data) all = all.concat(d.data);
+    const d = await apiCall('deals', {
+      status: 'all_not_deleted',
+      limit: 500,
+      start
+    });
+    if (!d.data) break;
+    // Garde uniquement les deals depuis nov 2025
+    const filtered = d.data.filter(deal => {
+      const date = (deal.add_time || '').substring(0, 10);
+      return date >= DATA_START;
+    });
+    all = all.concat(filtered);
+    // Si tous les deals de la page sont plus anciens, on arrête la pagination
+    const oldest = d.data.reduce((min, deal) => {
+      const date = (deal.add_time || '').substring(0, 10);
+      return date < min ? date : min;
+    }, '9999-99-99');
+    if (oldest < DATA_START) break;
     if (!d.additional_data?.pagination?.more_items_in_collection) break;
     start += 500;
   }
@@ -887,6 +905,16 @@ function renderSettings() {
       </div>
       <div style="font-size:12px;color:var(--text3);margin-top:6px">
         Règle : email identique + fenêtre de 7 jours · le RDV iClosed est conservé
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <h3>Période d'analyse</h3>
+      <p>Seuls les deals créés depuis cette date sont chargés. Défaut : novembre 2025 (début du tracking UTM).</p>
+      <div class="form-row">
+        <label>Date de début</label>
+        <input type="date" value="${load('dataStart','2025-11-01')}" id="data-start-input"
+          onchange="save('dataStart', this.value); location.reload()">
       </div>
     </div>
 
