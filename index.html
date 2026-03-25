@@ -325,7 +325,11 @@ const APP = {
   loading: false,
   error: null,
   lastSync: null,
-  charts: {}
+  charts: {},
+  dedupStats: null,
+  keptPipelineIds: [],
+  pipelineNames: {},
+  excludedCount: 0
 };
 
 // ─── Persistence ──────────────────────────────────────────────
@@ -358,9 +362,45 @@ async function fetchAllDeals() {
   return all;
 }
 
+async function fetchPersonEmails(personIds) {
+  const emailMap = {};
+  const uniqueIds = [...new Set(personIds.filter(Boolean))];
+  const chunks = [];
+  for (let i = 0; i < uniqueIds.length; i += 100) chunks.push(uniqueIds.slice(i, i+100));
+  for (const chunk of chunks) {
+    await Promise.all(chunk.map(async id => {
+      try {
+        const d = await apiCall('persons', { id });
+        const emails = d.data?.email || [];
+        const primary = emails.find(e => e.primary)?.value || emails[0]?.value || null;
+        if (primary) emailMap[id] = primary.toLowerCase().trim();
+      } catch(e) {}
+    }));
+  }
+  return emailMap;
+}
+
 async function fetchFields() {
   const d = await apiCall('dealFields', { limit: 200 });
   return d.data || [];
+}
+
+async function fetchPipelines() {
+  const d = await apiCall('pipelines', { limit: 100 });
+  return d.data || [];
+}
+
+function normalizeName(str) {
+  return (str || '').toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .trim();
+}
+
+function getKeptPipelineIds(pipelines) {
+  const KEPT = ['sales', 'autres financements', 'autre financement'];
+  return pipelines
+    .filter(p => KEPT.some(k => normalizeName(p.name).includes(k)))
+    .map(p => p.id);
 }
 
 // ─── Data Processing ──────────────────────────────────────────
@@ -399,23 +439,37 @@ function isPotentiel(deal, fields) {
   return med === 'potentiel' || med.includes('potentiel');
 }
 
-function deduplicatePotentiel(deals, fields) {
-  const byContact = new Map();
-  for (const d of deals) {
-    const cid = d.person_id?.value || d.org_id?.value;
-    if (!cid) continue;
-    if (!byContact.has(cid)) byContact.set(cid, []);
-    byContact.get(cid).push(d);
-  }
+function isRdvIClosed(deal, fields) {
+  const med = (getUtm(deal, fields, 'utm_medium') || '').toLowerCase();
+  return med.includes('rdv') && (med.includes('iclosed') || med.includes('closed'));
+}
 
+function deduplicatePotentiel(deals, fields, emailMap) {
+  const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
   const removed = new Set();
-  for (const [cid, group] of byContact) {
-    const hasSolid = group.some(d => !isPotentiel(d, fields));
-    if (hasSolid) {
-      group.filter(d => isPotentiel(d, fields)).forEach(d => removed.add(d.id));
-    }
+
+  const potentiels = deals.filter(d => isPotentiel(d, fields));
+  const rdvs = deals.filter(d => isRdvIClosed(d, fields));
+
+  for (const pot of potentiels) {
+    const personId = pot.person_id?.value;
+    const email = personId ? emailMap[personId] : null;
+    if (!email) continue;
+
+    const potDate = new Date(pot.add_time).getTime();
+
+    const match = rdvs.find(rdv => {
+      const rdvPersonId = rdv.person_id?.value;
+      const rdvEmail = rdvPersonId ? emailMap[rdvPersonId] : null;
+      if (!rdvEmail || rdvEmail !== email) return false;
+      const rdvDate = new Date(rdv.add_time).getTime();
+      return Math.abs(rdvDate - potDate) <= SEVEN_DAYS_MS;
+    });
+
+    if (match) removed.add(pot.id);
   }
 
+  APP.dedupStats = { removed: removed.size, total: potentiels.length };
   return deals.filter(d => !removed.has(d.id));
 }
 
@@ -437,7 +491,9 @@ function processDeal(deal, fields, costs) {
     cpl = costs[channel]?.cpl || 0;
   }
 
-  return { id: deal.id, title: deal.title || '', channel, campaign, medium, isWon, ca, month, closeMonth, cpl, raw: deal };
+  const pipelineName = APP.pipelineNames[deal.pipeline_id] || 'Inconnu';
+  const stageName = deal.stage_id ? (deal.active_flag ? 'actif' : 'inactif') : '';
+  return { id: deal.id, title: deal.title || '', channel, campaign, medium, isWon, ca, month, closeMonth, cpl, pipelineName, raw: deal };
 }
 
 function computeStats(deals) {
@@ -471,9 +527,24 @@ async function loadData() {
   render();
 
   try {
-    const [rawDeals, rawFields] = await Promise.all([fetchAllDeals(), fetchFields()]);
+    setSyncStatus('loading', 'Chargement des pipelines et deals...');
+    const [rawDeals, rawFields, pipelines] = await Promise.all([fetchAllDeals(), fetchFields(), fetchPipelines()]);
     APP.fields = buildFieldMap(rawFields);
-    const deduped = deduplicatePotentiel(rawDeals, APP.fields);
+    APP.keptPipelineIds = getKeptPipelineIds(pipelines);
+    APP.pipelineNames = Object.fromEntries(pipelines.map(p => [p.id, p.name]));
+
+    setSyncStatus('loading', 'Chargement des emails...');
+    const personIds = rawDeals.map(d => d.person_id?.value).filter(Boolean);
+    const emailMap = await fetchPersonEmails(personIds);
+
+    setSyncStatus('loading', 'Filtrage des pipelines...');
+    const pipelineFiltered = APP.keptPipelineIds.length > 0
+      ? rawDeals.filter(d => APP.keptPipelineIds.includes(d.pipeline_id))
+      : rawDeals;
+    APP.excludedCount = rawDeals.length - pipelineFiltered.length;
+
+    setSyncStatus('loading', 'Dédoublonnage...');
+    const deduped = deduplicatePotentiel(pipelineFiltered, APP.fields, emailMap);
     APP.deals = deduped.map(d => processDeal(d, APP.fields, APP.costs));
     APP.lastSync = new Date().toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'});
     save('cache', { deals: APP.deals, ts: Date.now() });
@@ -811,7 +882,28 @@ function renderSettings() {
     <div class="settings-group">
       <h3>Gestion des doublons "Potentiel"</h3>
       <p>Les leads avec utm_medium = "potentiel" sont automatiquement fusionnés avec le RDV iClosed du même contact. S'il n'existe pas de RDV associé, le lead Potentiel est conservé.</p>
-      <div style="font-size:13px;color:var(--green);font-weight:500">Dédoublonnage actif sur ${APP.deals.length} leads chargés</div>
+      <div style="font-size:13px;color:var(--green);font-weight:500">
+        Dédoublonnage actif · ${APP.dedupStats ? APP.dedupStats.removed + ' Potentiel(s) supprimé(s) sur ' + APP.dedupStats.total + ' détectés' : 'données non encore chargées'}
+      </div>
+      <div style="font-size:12px;color:var(--text3);margin-top:6px">
+        Règle : email identique + fenêtre de 7 jours · le RDV iClosed est conservé
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <h3>Filtrage des pipelines</h3>
+      <p>Seuls les deals des pipelines SALES et Autres Financements sont inclus. Le pipeline CSM et tous les autres sont exclus.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+        ${APP.keptPipelineIds.map(id => `
+          <span style="font-size:12px;padding:3px 10px;border-radius:20px;background:var(--green-bg);color:var(--green-text);font-weight:500">
+            ${APP.pipelineNames[id] || id}
+          </span>`).join('')}
+      </div>
+      <div style="font-size:13px;color:var(--text2)">
+        ${APP.excludedCount > 0
+          ? `<span style="color:var(--amber)">${APP.excludedCount} deal(s) exclus</span> (pipelines hors périmètre)`
+          : 'Aucun deal exclu pour l'instant'}
+      </div>
     </div>
 
     <div class="settings-group">
