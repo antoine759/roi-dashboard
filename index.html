@@ -246,15 +246,25 @@
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12l4-8 3 5 2-3 3 6"/><rect x="1" y="1" width="14" height="14" rx="2"/></svg>
       Par campagne
     </div>
-    <div class="nsec">Données</div>
-    <div class="ni" onclick="setView('import')">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2v8M5 7l3 3 3-3"/><path d="M3 12h10"/></svg>
-      Importer JSON
-    </div>
+
   </nav>
-  <div class="sfooter">
-    <span class="sdot"></span>
-    <span id="slbl">En attente de données</span>
+  <div class="sfooter" style="flex-direction:column;align-items:flex-start;gap:10px;">
+    <div style="display:flex;align-items:center;gap:8px;width:100%">
+      <span class="sdot"></span>
+      <span id="slbl" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">En attente de données</span>
+    </div>
+    <button onclick="document.getElementById('fi-sidebar').click()" style="
+      width:100%;font-size:12px;font-weight:600;padding:8px 12px;
+      border:1px dashed var(--border2);border-radius:var(--r);
+      background:transparent;color:var(--text3);cursor:pointer;
+      display:flex;align-items:center;gap:7px;
+      transition:all .15s;
+    " onmouseover="this.style.background='var(--brand-light)';this.style.color='var(--brand)';this.style.borderColor='var(--brand)'"
+       onmouseout="this.style.background='transparent';this.style.color='var(--text3)';this.style.borderColor='var(--border2)'">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2v8M5 7l3 3 3-3"/><path d="M3 12h10"/></svg>
+      Mettre à jour les données
+    </button>
+    <input type="file" id="fi-sidebar" accept=".json" style="display:none" onchange="handleF(this)">
   </div>
 </div>
 
@@ -300,6 +310,7 @@ function loadJSON(txt){
     A.data=JSON.parse(txt);
     A.f={monthFrom:'',monthTo:'',campaign:''};
     document.getElementById('slbl').textContent=`Maj ${A.data.generated_at}`;
+    try{ localStorage.setItem('oellear_roi_data', txt); }catch(e){}
     setView('global');
   }catch(e){alert('JSON invalide: '+e.message);}
 }
@@ -555,6 +566,36 @@ function setupDrop(){
   z.addEventListener('dragleave',()=>z.classList.remove('drag'));
   z.addEventListener('drop',e=>{e.preventDefault();z.classList.remove('drag');const f=e.dataTransfer.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>loadJSON(ev.target.result);r.readAsText(f);});
 }
+
+// Charger les données depuis GitHub (fichier dans le repo)
+(function(){
+  const slbl = document.getElementById('slbl');
+  slbl.textContent = 'Chargement...';
+  fetch('/pipedrive_data.json?t=' + Date.now())
+    .then(r => { if(!r.ok) throw new Error('Fichier introuvable'); return r.json(); })
+    .then(data => {
+      A.data = data;
+      A.view = 'global';
+      slbl.textContent = 'Maj ' + (data.generated_at||'');
+      // Sauvegarder aussi en localStorage comme fallback
+      try{ localStorage.setItem('oellear_roi_data', JSON.stringify(data)); }catch(e){}
+      render();
+    })
+    .catch(() => {
+      // Fallback localStorage si pas de fichier sur le serveur
+      try{
+        const saved = localStorage.getItem('oellear_roi_data');
+        if(saved){
+          A.data = JSON.parse(saved);
+          slbl.textContent = 'Maj ' + (A.data.generated_at||'') + ' (local)';
+          A.view = 'global';
+        } else {
+          slbl.textContent = 'Aucune donnée';
+        }
+      }catch(e){}
+      render();
+    });
+})();
 
 render();
 </script>
