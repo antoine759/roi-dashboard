@@ -148,41 +148,6 @@ function rb(roi) {
   return `<span class="badge br">${fR(roi)}</span>`;
 }
 
-function buildCampHeaders() {
-  const thead = document.getElementById('camp-thead');
-  if (!thead) return;
-  const cols = [
-    {key:'campaign', label:'Campagne'},
-    {key:'nb_leads', label:'Leads'},
-    {key:'nb_deals_gagnes', label:'Gagnés'},
-    {key:'taux', label:'Taux'},
-    {key:'ca', label:'CA'},
-    {key:'panier_moyen', label:'Panier'},
-    {key:'cout_ht', label:'Coût HT'},
-    {key:'cout_ttc', label:'Coût TTC'},
-    {key:'cpl_reel', label:'CPL réel'},
-    {key:'cac_reel', label:'CAC réel'},
-    {key:'benefice_net', label:'Bénéfice'},
-    {key:'roi', label:'ROI'},
-  ];
-  const tr = thead.querySelector('tr');
-  tr.innerHTML = '';
-  cols.forEach(({key, label}) => {
-    const th = document.createElement('th');
-    th.style.cursor = 'pointer';
-    th.style.whiteSpace = 'nowrap';
-    th.style.userSelect = 'none';
-    const isActive = A.sort.key === key;
-    const icon = isActive
-      ? (A.sort.dir === 'desc' ? ' ▼' : ' ▲')
-      : ' ⇅';
-    th.textContent = label + icon;
-    if (isActive) th.style.color = 'var(--blue)';
-    th.onclick = () => sortBy(key);
-    tr.appendChild(th);
-  });
-}
-
 function sortBy(key) {
   if (A.sort.key === key) {
     A.sort.dir = A.sort.dir === 'desc' ? 'asc' : 'desc';
@@ -191,13 +156,6 @@ function sortBy(key) {
     A.sort.dir = 'desc';
   }
   render();
-}
-
-function sortIcon(key) {
-  if (A.sort.key !== key) return ' <span style="opacity:.35;font-size:9px">⇅</span>';
-  return A.sort.dir === 'desc'
-    ? ' <span style="color:var(--blue);font-size:9px">▼</span>'
-    : ' <span style="color:var(--blue);font-size:9px">▲</span>';
 }
 
 function sortedCampaigns() {
@@ -456,7 +414,17 @@ function rCampaign() {
     <div class="tsub">${c.length} campagnes · triées par CA${hasPeriodFilter?' · <span style="color:var(--amber)">filtre période non appliqué aux campagnes</span>':''}</div></div></div>
     ${c.length === 0 ? '<div class="empty">Aucune campagne pour cette sélection.</div>' : `
     <div class="sec"><table>
-      <thead id="camp-thead"><tr></tr></thead>
+      <thead><tr>${[
+        ['campaign','Campagne'],['nb_leads','Leads'],['nb_deals_gagnes','Gagnés'],
+        ['taux','Taux'],['ca','CA'],['panier_moyen','Panier'],
+        ['cout_ht','Coût HT'],['cout_ttc','Coût TTC'],
+        ['cpl_reel','CPL réel'],['cac_reel','CAC réel'],
+        ['benefice_net','Bénéfice'],['roi','ROI']
+      ].map(([k,l]) => {
+        const active = A.sort.key===k;
+        const arrow = active ? (A.sort.dir==='desc' ? ' &darr;' : ' &uarr;') : ' <span style="opacity:.3">&updownarrow;</span>';
+        return '<th onclick="sortBy(\'' + k + '\')" style="cursor:pointer;white-space:nowrap' + (active?';color:var(--blue)':'') + '">' + l + arrow + '</th>';
+      }).join('')}</tr></thead>
       <tbody>${c.map(r=>`<tr>
         <td class="tdt" title="${r.campaign}">${r.campaign}</td>
         <td>${fN(r.nb_leads)}</td><td>${fN(r.nb_deals_gagnes)}</td>
@@ -492,7 +460,6 @@ function render() {
   });
 
   if (A.view === 'import') setupDrop();
-  if (A.view === 'campaign') buildCampHeaders();
 
   // Mettre à jour le compteur de résultats
   const fc = document.getElementById('filter-count');
