@@ -129,7 +129,8 @@
 const A = {
   view: 'import',
   data: null,
-  f: { monthFrom: '', monthTo: '', campaign: '' }
+  f: { monthFrom: '', monthTo: '', campaign: '' },
+  sort: { key: 'ca', dir: 'desc' }
 };
 
 const fE = n => typeof n==='number'&&n!==0 ? n.toLocaleString('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}) : '—';
@@ -145,6 +146,35 @@ function rb(roi) {
   if (roi>=500) return `<span class="badge bg">${fR(roi)}</span>`;
   if (roi>=0) return `<span class="badge bb">${fR(roi)}</span>`;
   return `<span class="badge br">${fR(roi)}</span>`;
+}
+
+function sortBy(key) {
+  if (A.sort.key === key) {
+    A.sort.dir = A.sort.dir === 'desc' ? 'asc' : 'desc';
+  } else {
+    A.sort.key = key;
+    A.sort.dir = 'desc';
+  }
+  render();
+}
+
+function sortIcon(key) {
+  if (A.sort.key !== key) return '<span style="color:var(--text3);font-size:10px;margin-left:3px">⇅</span>';
+  return A.sort.dir === 'desc'
+    ? '<span style="color:var(--blue);font-size:10px;margin-left:3px">↓</span>'
+    : '<span style="color:var(--blue);font-size:10px;margin-left:3px">↑</span>';
+}
+
+function sortedCampaigns() {
+  const c = [...(A.data?.campaigns || [])];
+  if (A.f.campaign) return c.filter(r => r.campaign === A.f.campaign);
+  const k = A.sort.key;
+  const dir = A.sort.dir === 'desc' ? -1 : 1;
+  return c.sort((a, b) => {
+    const av = a[k] ?? -Infinity;
+    const bv = b[k] ?? -Infinity;
+    return typeof av === 'string' ? av.localeCompare(bv) * dir : (av - bv) * dir;
+  });
 }
 
 function setView(v) {
@@ -378,8 +408,12 @@ function rCampaign() {
 
   // Si filtre période actif, on ne peut pas filtrer les campagnes par mois (pas dans le JSON)
   // On affiche un message d'info
-  let c = A.data.campaigns;
-  if (A.f.campaign) c = c.filter(r => r.campaign === A.f.campaign);
+  const c = sortedCampaigns().map(r => ({
+    ...r,
+    taux: r.nb_leads > 0 ? r.nb_deals_gagnes / r.nb_leads * 100 : 0,
+    cpl_reel: r.nb_leads > 0 ? Math.round(r.cout_ttc / r.nb_leads) : 0,
+    cac_reel: r.nb_deals_gagnes > 0 ? Math.round(r.cout_ttc / r.nb_deals_gagnes) : 0,
+  }));
 
   const filtLabel = hasActiveFilters() ? ' · filtré' : '';
   return `<div class="content">
@@ -388,18 +422,28 @@ function rCampaign() {
     ${c.length === 0 ? '<div class="empty">Aucune campagne pour cette sélection.</div>' : `
     <div class="sec"><table>
       <thead><tr>
-        <th>Campagne</th><th>Leads</th><th>Gagnés</th><th>Taux</th>
-        <th>CA</th><th>Panier</th><th>Coût HT</th><th>Coût TTC</th><th>CPL réel</th><th>CAC réel</th><th>Bénéfice</th><th>ROI</th>
+        <th onclick="sortBy('campaign')" style="cursor:pointer">Campagne${sortIcon('campaign')}</th>
+        <th onclick="sortBy('nb_leads')" style="cursor:pointer">Leads${sortIcon('nb_leads')}</th>
+        <th onclick="sortBy('nb_deals_gagnes')" style="cursor:pointer">Gagnés${sortIcon('nb_deals_gagnes')}</th>
+        <th onclick="sortBy('taux')" style="cursor:pointer">Taux${sortIcon('taux')}</th>
+        <th onclick="sortBy('ca')" style="cursor:pointer">CA${sortIcon('ca')}</th>
+        <th onclick="sortBy('panier_moyen')" style="cursor:pointer">Panier${sortIcon('panier_moyen')}</th>
+        <th onclick="sortBy('cout_ht')" style="cursor:pointer">Coût HT${sortIcon('cout_ht')}</th>
+        <th onclick="sortBy('cout_ttc')" style="cursor:pointer">Coût TTC${sortIcon('cout_ttc')}</th>
+        <th onclick="sortBy('cpl_reel')" style="cursor:pointer">CPL réel${sortIcon('cpl_reel')}</th>
+        <th onclick="sortBy('cac_reel')" style="cursor:pointer">CAC réel${sortIcon('cac_reel')}</th>
+        <th onclick="sortBy('benefice_net')" style="cursor:pointer">Bénéfice${sortIcon('benefice_net')}</th>
+        <th onclick="sortBy('roi')" style="cursor:pointer">ROI${sortIcon('roi')}</th>
       </tr></thead>
       <tbody>${c.map(r=>`<tr>
         <td class="tdt" title="${r.campaign}">${r.campaign}</td>
         <td>${fN(r.nb_leads)}</td><td>${fN(r.nb_deals_gagnes)}</td>
-        <td>${fP(r.nb_leads>0?r.nb_deals_gagnes/r.nb_leads*100:0)}</td>
+        <td>${fP(r.taux)}</td>
         <td>${fE(r.ca)}</td><td>${fE(r.panier_moyen)}</td>
         <td style="color:var(--text2)">${fE(r.cout_ht)}</td>
         <td>${fE(r.cout_ttc)}</td>
-        <td style="color:var(--amber)">${fCpl(r.nb_leads>0?Math.round(r.cout_ttc/r.nb_leads):0)}</td>
-        <td style="color:var(--amber)">${fCac(r.nb_deals_gagnes>0?Math.round(r.cout_ttc/r.nb_deals_gagnes):0)}</td>
+        <td style="color:var(--amber)">${fCpl(r.cpl_reel)}</td>
+        <td style="color:var(--amber)">${fCac(r.cac_reel)}</td>
         <td style="color:${r.benefice_net>=0?'var(--green)':'var(--red)'}">${fE(r.benefice_net)}</td>
         <td>${rb(r.roi)}</td>
       </tr>`).join('')}</tbody>
