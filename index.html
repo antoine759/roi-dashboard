@@ -610,7 +610,7 @@ function handleF(input){
 // Charger depuis serveur puis localStorage
 (function(){
   const slbl=document.getElementById('slbl');
-  fetch('/pipedrive_data.json?t='+Date.now())
+  fetch('/pipedrive_data.json?t='+Date.now(),{cache:'no-store'})
     .then(r=>{if(!r.ok)throw new Error();return r.json();})
     .then(data=>{A.data=data;slbl.textContent='Maj '+(data.generated_at||'');try{localStorage.setItem('oellear_roi_data',JSON.stringify(data));}catch(e){}render();})
     .catch(()=>{
