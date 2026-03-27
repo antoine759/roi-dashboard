@@ -9,13 +9,16 @@
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
       --brand:#545ac0;--brand2:#ef7738;--brand-light:#eeeffe;--brand2-light:#fff3ec;
-      --bg:#ffffff;--bg2:#f8f8fb;--bg3:#f2f2f7;
+      --bg:#fff;--bg2:#f8f8fb;--bg3:#f2f2f7;
       --text:#16161a;--text2:#5e5e72;--text3:#a0a0b8;
       --border:rgba(84,90,192,.1);--border2:rgba(84,90,192,.2);
       --green:#1a9e6e;--green-bg:#e6f7f1;--green-text:#0d6b4a;
       --red:#e04444;--red-bg:#fdf0f0;--red-text:#8b2020;
       --r:10px;--rl:14px;--rxl:20px;
       --shadow:0 1px 3px rgba(84,90,192,.08),0 4px 16px rgba(84,90,192,.06);
+      --ch-maf:#545ac0;--ch-maf-bg:#eeeffe;
+      --ch-google:#ea4335;--ch-google-bg:#fdecea;
+      --ch-organic:#1a9e6e;--ch-organic-bg:#e6f7f1;
     }
     @media(prefers-color-scheme:dark){:root{
       --bg:#13131a;--bg2:#1c1c26;--bg3:#22222f;
@@ -25,103 +28,77 @@
       --green-bg:#0d2d22;--green-text:#4dd4a0;
       --red-bg:#2d1010;--red-text:#f08080;
       --shadow:0 1px 3px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.2);
+      --ch-maf-bg:#1e1e35;--ch-google-bg:#2d1010;--ch-organic-bg:#0d2d22;
     }}
     body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg3);color:var(--text);font-size:14px;line-height:1.5;}
-
-    /* Sidebar */
-    .sidebar{
-      position:fixed;top:0;left:0;bottom:0;width:240px;
-      background:var(--bg);
-      border-right:1px solid var(--border);
-      display:flex;flex-direction:column;z-index:100;
-    }
-    .slogo{
-      padding:22px 20px 18px;
-      border-bottom:1px solid var(--border);
-    }
+    .sidebar{position:fixed;top:0;left:0;bottom:0;width:240px;background:var(--bg);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;}
+    .slogo{padding:22px 20px 18px;border-bottom:1px solid var(--border);}
     .slogo svg{width:120px;height:auto;}
     .slogo-sub{font-size:11px;color:var(--text3);margin-top:6px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;}
     .snav{flex:1;padding:14px 10px;overflow-y:auto;}
-    .nsec{
-      padding:4px 12px;font-size:10px;font-weight:700;color:var(--text3);
-      text-transform:uppercase;letter-spacing:.08em;margin:16px 0 6px;
-    }
-    .ni{
-      display:flex;align-items:center;gap:10px;
-      padding:9px 14px;font-size:13px;color:var(--text2);
-      cursor:pointer;border-radius:var(--r);margin:1px 0;
-      transition:all .15s;font-weight:500;
-    }
+    .nsec{padding:4px 12px;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin:16px 0 6px;}
+    .ni{display:flex;align-items:center;gap:10px;padding:9px 14px;font-size:13px;color:var(--text2);cursor:pointer;border-radius:var(--r);margin:1px 0;transition:all .15s;font-weight:500;}
     .ni:hover{background:var(--brand-light);color:var(--brand);}
     .ni.active{background:var(--brand-light);color:var(--brand);font-weight:600;}
     .ni svg{width:15px;height:15px;flex-shrink:0;opacity:.7;}
     .ni.active svg{opacity:1;}
-    .sfooter{
-      padding:14px 16px;border-top:1px solid var(--border);
-      font-size:12px;color:var(--text3);display:flex;align-items:center;gap:8px;
+    .ch-tabs{padding:8px 10px;border-top:1px solid var(--border);}
+    .ch-tab{
+      display:flex;align-items:center;gap:8px;padding:8px 14px;font-size:13px;
+      color:var(--text2);cursor:pointer;border-radius:var(--r);margin:2px 0;
+      transition:all .15s;font-weight:500;
     }
-    .sdot{
-      width:7px;height:7px;border-radius:50%;
-      background:var(--green);flex-shrink:0;
-      box-shadow:0 0 0 3px var(--green-bg);
+    .ch-tab:hover{background:var(--bg2);}
+    .ch-tab.active{font-weight:700;}
+    .ch-tab.active.maf{background:var(--ch-maf-bg);color:var(--ch-maf);}
+    .ch-tab.active.google{background:var(--ch-google-bg);color:var(--ch-google);}
+    .ch-tab.active.organic{background:var(--ch-organic-bg);color:var(--ch-organic);}
+    .ch-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+    .ch-tab.all .ch-dot{background:linear-gradient(135deg,var(--brand),var(--brand2));}
+    .ch-tab.maf .ch-dot{background:var(--ch-maf);}
+    .ch-tab.google .ch-dot{background:var(--ch-google);}
+    .ch-tab.organic .ch-dot{background:var(--ch-organic);}
+    .sfooter{padding:14px 16px;border-top:1px solid var(--border);font-size:12px;color:var(--text3);display:flex;flex-direction:column;gap:10px;}
+    .sfooter-status{display:flex;align-items:center;gap:8px;}
+    .sdot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0;box-shadow:0 0 0 3px var(--green-bg);}
+    .import-btn{
+      width:100%;font-size:12px;font-weight:600;padding:8px 12px;
+      border:1px dashed var(--border2);border-radius:var(--r);
+      background:transparent;color:var(--text3);cursor:pointer;
+      display:flex;align-items:center;gap:7px;transition:all .15s;
     }
-
-    /* Filter bar */
-    .filterbar{
-      position:sticky;top:0;z-index:50;
-      background:var(--bg);
-      border-bottom:1px solid var(--border);
-      padding:10px 32px;
-      display:flex;align-items:center;gap:10px;flex-wrap:wrap;
-    }
+    .import-btn:hover{background:var(--brand-light);color:var(--brand);border-color:var(--brand);}
+    .filterbar{position:sticky;top:0;z-index:50;background:var(--bg);border-bottom:1px solid var(--border);padding:10px 32px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
     .filterbar svg{color:var(--text3);flex-shrink:0;}
-    .filterbar select,.filterbar input{
-      font-size:13px;padding:6px 12px;
-      border:1px solid var(--border2);border-radius:var(--r);
-      background:var(--bg2);color:var(--text);height:34px;
-      transition:border-color .15s;
-    }
-    .filterbar select:focus,.filterbar input:focus{outline:none;border-color:var(--brand);}
+    .filterbar select{font-size:13px;padding:6px 12px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text);height:34px;transition:border-color .15s;}
+    .filterbar select:focus{outline:none;border-color:var(--brand);}
     .filter-sep{width:1px;height:20px;background:var(--border);margin:0 4px;}
-    .filter-tag{
-      display:inline-flex;align-items:center;gap:5px;
-      font-size:12px;padding:4px 10px;border-radius:20px;
-      background:var(--brand-light);color:var(--brand);font-weight:600;
-    }
+    .filter-tag{display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:4px 10px;border-radius:20px;background:var(--brand-light);color:var(--brand);font-weight:600;}
     .filter-tag button{background:none;border:none;cursor:pointer;color:var(--brand);font-size:14px;line-height:1;padding:0;opacity:.6;}
-    .filter-tag button:hover{opacity:1;}
     .btn-reset{font-size:12px;color:var(--text3);background:none;border:none;cursor:pointer;padding:4px 8px;border-radius:var(--r);}
     .btn-reset:hover{background:var(--bg2);color:var(--text);}
-
-    /* Main content */
-    .main{margin-left:240px;padding:0;}
+    .main{margin-left:240px;}
     .content{padding:32px 36px;max-width:1300px;}
     .topbar{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px;gap:12px;}
     .ttitle{font-size:22px;font-weight:700;letter-spacing:-.02em;}
     .tsub{font-size:13px;color:var(--text3);margin-top:4px;}
-    .tbadge{
-      display:inline-block;font-size:11px;font-weight:700;
-      padding:4px 12px;border-radius:20px;
-      background:linear-gradient(135deg,var(--brand-light),var(--brand2-light));
-      color:var(--brand);letter-spacing:.04em;text-transform:uppercase;
-    }
-
-    /* KPI Cards */
-    .kgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:28px;}
-    .kcard{
-      background:var(--bg);border:1px solid var(--border);
-      border-radius:var(--rl);padding:18px 20px;
-      box-shadow:var(--shadow);transition:transform .15s,box-shadow .15s;
-      position:relative;overflow:hidden;
-    }
-    .kcard::before{
-      content:'';position:absolute;top:0;left:0;right:0;height:3px;
-      background:var(--border);border-radius:var(--rl) var(--rl) 0 0;
-    }
+    .channel-badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:5px 14px;border-radius:20px;letter-spacing:.03em;}
+    .channel-badge.maf{background:var(--ch-maf-bg);color:var(--ch-maf);}
+    .channel-badge.google{background:var(--ch-google-bg);color:var(--ch-google);}
+    .channel-badge.organic{background:var(--ch-organic-bg);color:var(--ch-organic);}
+    .channel-badge.all{background:var(--brand-light);color:var(--brand);}
+    .accent-bar{height:4px;background:linear-gradient(90deg,var(--brand),var(--brand2));margin-bottom:28px;border-radius:var(--r);}
+    .accent-bar.google{background:linear-gradient(90deg,#ea4335,#fbbc04);}
+    .accent-bar.organic{background:linear-gradient(90deg,#1a9e6e,#4dd4a0);}
+    .kgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:14px;margin-bottom:28px;}
+    .kcard{background:var(--bg);border:1px solid var(--border);border-radius:var(--rl);padding:18px 20px;box-shadow:var(--shadow);transition:transform .15s;position:relative;overflow:hidden;}
+    .kcard::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--border);}
     .kcard.accent::before{background:var(--brand);}
     .kcard.accent2::before{background:var(--brand2);}
     .kcard.pos::before{background:var(--green);}
-    .kcard:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(84,90,192,.12);}
+    .kcard.google-k::before{background:#ea4335;}
+    .kcard.organic-k::before{background:#1a9e6e;}
+    .kcard:hover{transform:translateY(-1px);}
     .klbl{font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;}
     .kval{font-size:26px;font-weight:700;line-height:1;letter-spacing:-.02em;}
     .ksub{font-size:12px;color:var(--text3);margin-top:5px;}
@@ -129,92 +106,47 @@
     .kcard.accent2 .kval{color:var(--brand2);}
     .kcard.pos .kval{color:var(--green);}
     .kcard.neg .kval{color:var(--red);}
-
-    /* Sections */
-    .sec{
-      background:var(--bg);border:1px solid var(--border);
-      border-radius:var(--rl);padding:22px 24px;
-      margin-bottom:20px;box-shadow:var(--shadow);
-    }
+    .kcard.google-k .kval{color:#ea4335;}
+    .kcard.organic-k .kval{color:#1a9e6e;}
+    .sec{background:var(--bg);border:1px solid var(--border);border-radius:var(--rl);padding:22px 24px;margin-bottom:20px;box-shadow:var(--shadow);}
     .sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
-    .st{font-size:15px;font-weight:700;letter-spacing:-.01em;}
+    .st{font-size:15px;font-weight:700;}
     .stag{font-size:12px;color:var(--text3);background:var(--bg2);padding:3px 10px;border-radius:20px;}
-
-    /* Tables */
-    .table-wrap{overflow-x:auto;margin:-4px;}
+    .table-wrap{overflow-x:auto;}
     table{width:100%;border-collapse:collapse;font-size:13px;}
-    th{
-      text-align:left;font-size:10px;font-weight:700;color:var(--text3);
-      padding:8px 12px;border-bottom:1px solid var(--border);
-      text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;
-      background:var(--bg2);
-    }
-    th:first-child{border-radius:var(--r) 0 0 0;}
-    th:last-child{border-radius:0 var(--r) 0 0;}
+    th{text-align:left;font-size:10px;font-weight:700;color:var(--text3);padding:8px 12px;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;background:var(--bg2);}
     td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle;}
     tr:last-child td{border-bottom:none;}
-    tbody tr{transition:background .1s;}
     tbody tr:hover td{background:var(--brand-light);}
-    .tdt{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     .tfoot td{background:var(--bg2);font-weight:700;border-top:2px solid var(--border);}
-
-    /* Badges */
+    .tdt{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     .badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap;}
     .bg{background:var(--green-bg);color:var(--green-text);}
     .bb{background:var(--brand-light);color:var(--brand);}
     .br{background:var(--red-bg);color:var(--red-text);}
-
-    /* Charts */
     .cw{position:relative;width:100%;}
-
-    /* Import zone */
-    .izone{
-      border:2px dashed var(--border2);border-radius:var(--rxl);
-      padding:56px 32px;text-align:center;cursor:pointer;
-      transition:all .2s;background:var(--bg);
-    }
-    .izone:hover,.izone.drag{
-      background:var(--brand-light);border-color:var(--brand);
-    }
-    .izone-icon{
-      width:52px;height:52px;border-radius:var(--rl);
-      background:var(--brand-light);display:flex;align-items:center;
-      justify-content:center;margin:0 auto 16px;
-    }
+    .compare-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:20px;}
+    .compare-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--rl);padding:20px;box-shadow:var(--shadow);}
+    .compare-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+    .compare-stat{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;border-bottom:1px solid var(--border);}
+    .compare-stat:last-child{border-bottom:none;}
+    .compare-stat .label{font-size:12px;color:var(--text3);}
+    .compare-stat .val{font-size:14px;font-weight:700;}
+    .izone{border:2px dashed var(--border2);border-radius:var(--rxl);padding:56px 32px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg);}
+    .izone:hover,.izone.drag{background:var(--brand-light);border-color:var(--brand);}
+    .izone-icon{width:52px;height:52px;border-radius:var(--rl);background:var(--brand-light);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;}
     .izone-icon svg{width:24px;height:24px;color:var(--brand);}
     .izone h3{font-size:17px;font-weight:700;margin-bottom:8px;}
     .izone p{font-size:13px;color:var(--text2);margin-bottom:24px;line-height:1.7;max-width:400px;margin-left:auto;margin-right:auto;}
-    .btn{
-      font-size:13px;padding:9px 18px;border-radius:var(--r);
-      border:none;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:7px;
-      transition:all .15s;
-    }
+    .btn{font-size:13px;padding:9px 18px;border-radius:var(--r);border:none;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:7px;transition:all .15s;}
     .btn-primary{background:var(--brand);color:#fff;}
-    .btn-primary:hover{background:#454ab0;transform:translateY(-1px);}
-    .iinfo{
-      margin-top:20px;padding:18px 22px;
-      background:var(--bg2);border-radius:var(--rl);
-      font-size:13px;color:var(--text2);line-height:1.9;text-align:left;
-    }
+    .btn-primary:hover{opacity:.9;transform:translateY(-1px);}
+    .iinfo{margin-top:20px;padding:18px 22px;background:var(--bg2);border-radius:var(--rl);font-size:13px;color:var(--text2);line-height:1.9;text-align:left;}
     .iinfo strong{color:var(--text);font-weight:700;}
-    .spin{
-      width:32px;height:32px;border-radius:50%;
-      border:2.5px solid var(--border2);border-top-color:var(--brand);
-      animation:spin .7s linear infinite;margin:0 auto 20px;
-    }
-    @keyframes spin{to{transform:rotate(360deg)}}
     .empty{text-align:center;padding:48px;color:var(--text3);font-size:13px;}
-
-    /* Divider accent */
-    .accent-bar{
-      height:4px;border-radius:2px;
-      background:linear-gradient(90deg,var(--brand),var(--brand2));
-      margin-bottom:28px;border-radius:var(--r);
-    }
   </style>
 </head>
 <body>
-
 <div class="sidebar">
   <div class="slogo">
     <svg viewBox="0 0 1217.01 227.95" xmlns="http://www.w3.org/2000/svg">
@@ -246,37 +178,32 @@
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12l4-8 3 5 2-3 3 6"/><rect x="1" y="1" width="14" height="14" rx="2"/></svg>
       Par campagne
     </div>
-
   </nav>
-  <div class="sfooter" style="flex-direction:column;align-items:flex-start;gap:10px;">
-    <div style="display:flex;align-items:center;gap:8px;width:100%">
-      <span class="sdot"></span>
-      <span id="slbl" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">En attente de données</span>
-    </div>
-    <button onclick="document.getElementById('fi-sidebar').click()" style="
-      width:100%;font-size:12px;font-weight:600;padding:8px 12px;
-      border:1px dashed var(--border2);border-radius:var(--r);
-      background:transparent;color:var(--text3);cursor:pointer;
-      display:flex;align-items:center;gap:7px;
-      transition:all .15s;
-    " onmouseover="this.style.background='var(--brand-light)';this.style.color='var(--brand)';this.style.borderColor='var(--brand)'"
-       onmouseout="this.style.background='transparent';this.style.color='var(--text3)';this.style.borderColor='var(--border2)'">
+  <div class="ch-tabs">
+    <div class="nsec" style="margin-top:4px">Canal</div>
+    <div class="ch-tab all active" onclick="setCh('all')"><span class="ch-dot"></span>Tous les canaux</div>
+    <div class="ch-tab maf" onclick="setCh('maformation')"><span class="ch-dot"></span>MaFormation</div>
+    <div class="ch-tab google" onclick="setCh('google')"><span class="ch-dot"></span>Google Ads</div>
+    <div class="ch-tab organic" onclick="setCh('organic')"><span class="ch-dot"></span>Organic</div>
+  </div>
+  <div class="sfooter">
+    <div class="sfooter-status"><span class="sdot"></span><span id="slbl">Chargement...</span></div>
+    <button class="import-btn" onclick="document.getElementById('fi-sb').click()">
       <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2v8M5 7l3 3 3-3"/><path d="M3 12h10"/></svg>
       Mettre à jour les données
     </button>
-    <input type="file" id="fi-sidebar" accept=".json" style="display:none" onchange="handleF(this)">
+    <input type="file" id="fi-sb" accept=".json" style="display:none" onchange="handleF(this)">
   </div>
 </div>
 
 <main class="main" id="main"></main>
 
 <script>
-const A={view:'import',data:null,f:{monthFrom:'',monthTo:'',campaign:''},sort:{key:'ca',dir:'desc'}};
+const A={view:'global',data:null,ch:'all',f:{monthFrom:'',monthTo:'',campaign:''},sort:{key:'ca',dir:'desc'}};
 const fE=n=>typeof n==='number'&&n!==0?n.toLocaleString('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}):'—';
 const fP=n=>typeof n==='number'&&isFinite(n)?n.toFixed(1)+'%':'—';
 const fR=n=>n==null?'—':(n>=0?'+':'')+Math.round(n)+'%';
 const fN=n=>typeof n==='number'?n.toLocaleString('fr-FR'):'—';
-const fCpl=n=>typeof n==='number'&&n>0?fE(n):'—';
 
 function rb(roi){
   if(roi==null)return'<span class="badge" style="background:var(--bg2);color:var(--text3)">—</span>';
@@ -285,54 +212,67 @@ function rb(roi){
   return`<span class="badge br">${fR(roi)}</span>`;
 }
 
-function sortBy(key){
-  A.sort.key===key?(A.sort.dir=A.sort.dir==='desc'?'asc':'desc'):(A.sort.key=key,A.sort.dir='desc');
-  render();
+const CH_LABELS={all:'Tous les canaux',maformation:'MaFormation',google:'Google Ads',organic:'Organic'};
+const CH_COLORS={all:'var(--brand)',maformation:'var(--ch-maf)',google:'var(--ch-google)',organic:'var(--ch-organic)'};
+const CH_CHART={all:'#545ac0',maformation:'#545ac0',google:'#ea4335',organic:'#1a9e6e'};
+
+function getCurrentData(){
+  if(!A.data)return null;
+  if(A.ch==='all')return null;
+  return A.data.channels[A.ch]||null;
 }
 
-function sortedCampaigns(){
-  let c=[...(A.data?.campaigns||[])];
-  if(A.f.campaign)c=c.filter(r=>r.campaign===A.f.campaign);
-  const k=A.sort.key,dir=A.sort.dir==='desc'?-1:1;
-  return c.map(r=>({...r,taux:r.nb_leads>0?r.nb_deals_gagnes/r.nb_leads*100:0,cpl_reel:r.nb_leads>0?Math.round(r.cout_ttc/r.nb_leads):0,cac_reel:r.nb_deals_gagnes>0?Math.round(r.cout_ttc/r.nb_deals_gagnes):0}))
-    .sort((a,b)=>{const av=a[k]??-Infinity,bv=b[k]??-Infinity;return typeof av==='string'?av.localeCompare(bv)*dir:(av-bv)*dir;});
+function setCh(ch){
+  A.ch=ch;
+  document.querySelectorAll('.ch-tab').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.ch-tab')[['all','maformation','google','organic'].indexOf(ch)]?.classList.add('active');
+  A.f={monthFrom:'',monthTo:'',campaign:''};
+  render();
 }
 
 function setView(v){
   A.view=v;
   document.querySelectorAll('.ni').forEach(el=>el.classList.remove('active'));
-  ['global','monthly','campaign','import'].forEach((x,i)=>{if(x===v)document.querySelectorAll('.ni')[i]?.classList.add('active');});
+  ['global','monthly','campaign'].forEach((x,i)=>{if(x===v)document.querySelectorAll('.ni')[i]?.classList.add('active');});
   render();
 }
 
 function loadJSON(txt){
   try{
     A.data=JSON.parse(txt);
-    A.f={monthFrom:'',monthTo:'',campaign:''};
-    document.getElementById('slbl').textContent=`Maj ${A.data.generated_at}`;
-    try{ localStorage.setItem('oellear_roi_data', txt); }catch(e){}
-    setView('global');
+    try{localStorage.setItem('oellear_roi_data',txt);}catch(e){}
+    document.getElementById('slbl').textContent='Maj '+(A.data.generated_at||'');
+    A.view='global';A.ch='all';
+    setCh('all');
   }catch(e){alert('JSON invalide: '+e.message);}
 }
 
-function getMonths(){return A.data?[...new Set(A.data.monthly.map(r=>r.month))].sort():[];}
-function getCampaigns(){return A.data?[...new Set(A.data.campaigns.map(r=>r.campaign))].filter(c=>c&&c!=='(Non renseigné)').sort():[];}
+function getMonths(){
+  const d=getCurrentData();
+  if(!d)return[...new Set(Object.values(A.data.channels).flatMap(c=>c.monthly.map(r=>r.month)))].sort();
+  return d.monthly.map(r=>r.month);
+}
 
-function filterMonthly(){
-  if(!A.data)return[];
-  return A.data.monthly.filter(r=>{
+function getCampaigns(){
+  const d=getCurrentData();
+  if(!d)return[];
+  return[...new Set(d.campaigns.map(r=>r.campaign))].filter(c=>c&&c!=='(Non renseigné)').sort();
+}
+
+function filterMonthly(monthly){
+  return monthly.filter(r=>{
     if(A.f.monthFrom&&r.month<A.f.monthFrom)return false;
     if(A.f.monthTo&&r.month>A.f.monthTo)return false;
     return true;
   });
 }
 
-function computeTotals(monthly){
+function computeTotals(monthly,hasCosts=true){
   const nb_leads=monthly.reduce((s,r)=>s+r.nb_leads,0);
   const nb_won=monthly.reduce((s,r)=>s+r.nb_deals_gagnes,0);
   const ca=monthly.reduce((s,r)=>s+r.ca,0);
-  const cout_ht=monthly.reduce((s,r)=>s+r.cout_ht,0);
-  const cout_ttc=monthly.reduce((s,r)=>s+r.cout_ttc,0);
+  const cout_ht=monthly.reduce((s,r)=>s+(r.cout_ht||0),0);
+  const cout_ttc=monthly.reduce((s,r)=>s+(r.cout_ttc||0),0);
   const benefice=ca-cout_ttc;
   const roi=cout_ttc>0?benefice/cout_ttc*100:null;
   return{nb_leads,nb_deals_gagnes:nb_won,ca,cout_ht,cout_ttc,benefice_net:benefice,roi,panier_moyen:nb_won>0?ca/nb_won:0};
@@ -341,8 +281,9 @@ function computeTotals(monthly){
 function hasFilters(){return A.f.monthFrom||A.f.monthTo||A.f.campaign;}
 
 function renderFilterBar(){
-  if(!A.data||A.view==='import')return'';
-  const months=getMonths(),camps=getCampaigns();
+  if(!A.data)return'';
+  const months=getMonths();
+  const camps=getCampaigns();
   const tags=[];
   if(A.f.monthFrom)tags.push({l:`Depuis ${A.f.monthFrom}`,k:'monthFrom'});
   if(A.f.monthTo)tags.push({l:`Jusqu'à ${A.f.monthTo}`,k:'monthTo'});
@@ -359,200 +300,278 @@ function renderFilterBar(){
       <option value="">Fin</option>
       ${months.map(m=>`<option value="${m}" ${A.f.monthTo===m?'selected':''}>${m}</option>`).join('')}
     </select>
-    <div class="filter-sep"></div>
+    ${camps.length?`<div class="filter-sep"></div>
     <select style="max-width:220px" onchange="A.f.campaign=this.value;render()">
-      <option value="">Toutes les campagnes</option>
+      <option value="">Toutes campagnes</option>
       ${camps.map(c=>`<option value="${c}" ${A.f.campaign===c?'selected':''}>${c.length>45?c.substring(0,45)+'…':c}</option>`).join('')}
-    </select>
-    ${tags.length?`<div class="filter-sep"></div>${tags.map(t=>`<span class="filter-tag">${t.l}<button onclick="A.f['${t.k}']='';render()">×</button></span>`).join('')}<button class="btn-reset" onclick="A.f={monthFrom:'',monthTo:'',campaign:''};render()">Tout effacer</button>`:''}
+    </select>`:''}
+    ${tags.length?`<div class="filter-sep"></div>${tags.map(t=>`<span class="filter-tag">${t.l}<button onclick="A.f['${t.k}']='';render()">×</button></span>`).join('')}<button class="btn-reset" onclick="A.f={monthFrom:'',monthTo:'',campaign:''};render()">Effacer</button>`:''}
     <span style="margin-left:auto;font-size:12px;color:var(--text3)" id="fcount"></span>
   </div>`;
 }
 
-function rImport(){
-  return`<div class="content">
-    <div class="topbar"><div>
-      <div class="ttitle">Bienvenue sur votre dashboard</div>
-      <div class="tsub">Importez vos données Pipedrive pour commencer</div>
-    </div></div>
-    <div class="izone" id="dz" onclick="document.getElementById('fi').click()">
-      <div class="izone-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
-        </svg>
-      </div>
-      <h3>Déposer le fichier pipedrive_data.json</h3>
-      <p>Glissez-déposez le fichier ici, ou cliquez pour le sélectionner.<br>Généré par Claude à partir de vos exports CSV Pipedrive.</p>
-      <button class="btn btn-primary" onclick="event.stopPropagation();document.getElementById('fi').click()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-        Choisir un fichier
-      </button>
-      <input type="file" id="fi" accept=".json" style="display:none" onchange="handleF(this)">
-    </div>
-    <div class="iinfo">
-      <strong>Comment mettre à jour :</strong><br>
-      1. Exportez vos CSV depuis Pipedrive (Prospects + Affaires avec archivés)<br>
-      2. Envoyez-les à Claude avec : <em>"Mets à jour le dashboard"</em><br>
-      3. Claude génère un nouveau <code style="background:var(--bg3);padding:1px 5px;border-radius:4px">pipedrive_data.json</code><br>
-      4. Importez-le ici — mise à jour instantanée
-    </div>
-  </div>`;
+function chBadge(ch){
+  const label=CH_LABELS[ch]||ch;
+  return`<span class="channel-badge ${ch}">${label}</span>`;
 }
 
-function rGlobal(){
-  const monthly=filterMonthly();
-  const t=hasFilters()?computeTotals(monthly):A.data.totals;
+function rNoData(){
+  return`<div class="content"><div style="text-align:center;padding:80px 40px">
+    <div style="font-size:48px;margin-bottom:16px">📊</div>
+    <div style="font-size:18px;font-weight:700;margin-bottom:8px">Aucune donnée</div>
+    <div style="font-size:14px;color:var(--text3)">Utilisez le bouton en bas à gauche pour importer vos données.</div>
+  </div></div>`;
+}
+
+function rGlobalAll(){
+  const chs=A.data.channels;
   const dk=matchMedia('(prefers-color-scheme:dark)').matches;
   const tc=dk?'#8888a8':'#5e5e72',gc=dk?'rgba(255,255,255,.05)':'rgba(84,90,192,.06)';
-  const labels=monthly.map(r=>r.month),caD=monthly.map(r=>r.ca),lD=monthly.map(r=>r.nb_leads),cD=monthly.map(r=>r.cout_ttc);
-  const fl=hasFilters()?' · filtré':'';
+  const g=A.data.global;
+
+  // Build combined monthly for chart
+  const allMonths=[...new Set(Object.values(chs).flatMap(c=>c.monthly.map(r=>r.month)))].sort().filter(m=>!A.f.monthFrom||m>=A.f.monthFrom).filter(m=>!A.f.monthTo||m<=A.f.monthTo);
+  const mafM=chs.maformation?.monthly||[]; const gM=chs.google?.monthly||[]; const oM=chs.organic?.monthly||[];
+  const getData=(arr,month)=>arr.find(r=>r.month===month);
+
+  const caMAF=allMonths.map(m=>getData(mafM,m)?.ca||0);
+  const caG=allMonths.map(m=>getData(gM,m)?.ca||0);
+  const caO=allMonths.map(m=>getData(oM,m)?.ca||0);
+  const leadsMAF=allMonths.map(m=>getData(mafM,m)?.nb_leads||0);
+  const leadsG=allMonths.map(m=>getData(gM,m)?.nb_leads||0);
+  const leadsO=allMonths.map(m=>getData(oM,m)?.nb_leads||0);
+
+  const totalCA=chs.maformation.totals.ca+chs.google.totals.ca+chs.organic.totals.ca;
+  const totalLeads=chs.maformation.totals.nb_leads+chs.google.totals.nb_leads+chs.organic.totals.nb_leads;
+  const totalWon=chs.maformation.totals.nb_deals_gagnes+chs.google.totals.nb_deals_gagnes+chs.organic.totals.nb_deals_gagnes;
+  const totalCout=chs.maformation.totals.cout_ttc;
+
   return`<div class="content">
     <div class="topbar">
-      <div>
-        <div class="ttitle">Vue globale${fl}</div>
-        <div class="tsub">Depuis ${A.data.data_start} · Coûts TTC (TVA 20%)</div>
-      </div>
-      <span class="tbadge">MaFormation</span>
+      <div><div class="ttitle">Vue globale · Tous canaux</div><div class="tsub">Depuis ${A.data.data_start}</div></div>
+      ${chBadge('all')}
     </div>
     <div class="accent-bar"></div>
     <div class="kgrid">
-      <div class="kcard accent"><div class="klbl">Leads totaux</div><div class="kval">${fN(t.nb_leads)}</div><div class="ksub">prospects + affaires</div></div>
-      <div class="kcard pos"><div class="klbl">Deals gagnés</div><div class="kval">${fN(t.nb_deals_gagnes)}</div><div class="ksub">${fP(t.nb_leads>0?t.nb_deals_gagnes/t.nb_leads*100:0)} taux conv.</div></div>
-      <div class="kcard"><div class="klbl">CA total</div><div class="kval" style="font-size:20px">${fE(t.ca)}</div><div class="ksub">panier ${fE(t.panier_moyen)}</div></div>
-      <div class="kcard"><div class="klbl">Coût TTC</div><div class="kval" style="font-size:20px">${fE(t.cout_ttc)}</div><div class="ksub">HT ${fE(t.cout_ht)}</div></div>
-      <div class="kcard accent2"><div class="klbl">CPL réel TTC</div><div class="kval" style="font-size:20px">${fE(t.nb_leads>0?Math.round(t.cout_ttc/t.nb_leads):0)}</div><div class="ksub">coût / lead</div></div>
-      <div class="kcard accent2"><div class="klbl">CAC réel TTC</div><div class="kval" style="font-size:20px">${fE(t.nb_deals_gagnes>0?Math.round(t.cout_ttc/t.nb_deals_gagnes):0)}</div><div class="ksub">CPL ÷ taux closing</div></div>
-      <div class="kcard pos"><div class="klbl">Bénéfice net</div><div class="kval" style="font-size:20px">${fE(t.benefice_net)}</div></div>
-      <div class="kcard pos"><div class="klbl">ROI</div><div class="kval">${fR(t.roi)}</div><div class="ksub">sur coût TTC</div></div>
+      <div class="kcard accent"><div class="klbl">Leads totaux</div><div class="kval">${fN(totalLeads)}</div><div class="ksub">tous canaux</div></div>
+      <div class="kcard pos"><div class="klbl">Deals gagnés</div><div class="kval">${fN(totalWon)}</div><div class="ksub">${fP(totalLeads>0?totalWon/totalLeads*100:0)} conv.</div></div>
+      <div class="kcard"><div class="klbl">CA total</div><div class="kval" style="font-size:20px">${fE(totalCA)}</div></div>
+      <div class="kcard accent2"><div class="klbl">Coût TTC (MaForm.)</div><div class="kval" style="font-size:20px">${fE(totalCout)}</div><div class="ksub">Google Ads à venir</div></div>
+    </div>
+    <div class="compare-grid">
+      ${['maformation','google','organic'].map(ch=>{
+        const d=chs[ch]; const t=d.totals; const color=CH_COLORS[ch];
+        return`<div class="compare-card">
+          <div class="compare-card-header">${chBadge(ch)}<button onclick="setCh('${ch}')" style="font-size:12px;color:var(--text3);background:none;border:none;cursor:pointer;text-decoration:underline">Voir détail →</button></div>
+          <div class="compare-stat"><span class="label">Leads</span><span class="val" style="color:${color}">${fN(t.nb_leads)}</span></div>
+          <div class="compare-stat"><span class="label">Deals gagnés</span><span class="val" style="color:${color}">${fN(t.nb_deals_gagnes)}</span></div>
+          <div class="compare-stat"><span class="label">Taux conv.</span><span class="val">${fP(t.nb_leads>0?t.nb_deals_gagnes/t.nb_leads*100:0)}</span></div>
+          <div class="compare-stat"><span class="label">CA</span><span class="val">${fE(t.ca)}</span></div>
+          <div class="compare-stat"><span class="label">Panier moyen</span><span class="val">${fE(t.panier_moyen)}</span></div>
+          ${t.cout_ttc>0?`<div class="compare-stat"><span class="label">ROI</span><span class="val">${rb(t.roi)}</span></div>`:''}
+        </div>`;
+      }).join('')}
     </div>
     <div class="sec">
-      <div class="sh"><span class="st">CA mensuel</span><span class="stag">par date de gain</span></div>
-      <div class="cw" style="height:230px"><canvas id="cc"></canvas></div>
+      <div class="sh"><span class="st">CA par canal et par mois</span><span class="stag">par date de gain</span></div>
+      <div class="cw" style="height:240px"><canvas id="cc"></canvas></div>
     </div>
     <div class="sec">
-      <div class="sh"><span class="st">Leads & coût TTC</span><span class="stag">par mois de création</span></div>
-      <div class="cw" style="height:210px"><canvas id="cl"></canvas></div>
+      <div class="sh"><span class="st">Leads par canal et par mois</span><span class="stag">par date de création</span></div>
+      <div class="cw" style="height:220px"><canvas id="cl"></canvas></div>
     </div>
   </div>
   <script>(function(){
     const tc='${tc}',gc='${gc}';
-    const l=${JSON.stringify(labels)},ca=${JSON.stringify(caD)},ld=${JSON.stringify(lD)},cd=${JSON.stringify(cD)};
-    const bo={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tc,font:{size:11},maxRotation:45,autoSkip:true,maxTicksLimit:8},grid:{color:gc}},y:{ticks:{color:tc,font:{size:11}},grid:{color:gc}}}};
+    const l=${JSON.stringify(allMonths)};
     if(window._c1)window._c1.destroy();if(window._c2)window._c2.destroy();
-    window._c1=new Chart(document.getElementById('cc'),{type:'bar',data:{labels:l,datasets:[{data:ca,backgroundColor:'#545ac0',borderRadius:6,borderSkipped:false}]},options:{...bo,scales:{...bo.scales,y:{...bo.scales.y,ticks:{...bo.scales.y.ticks,callback:v=>v>=1000?(v/1000).toFixed(0)+'k€':v+'€'}}}}});
+    const bo={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:tc,font:{size:12},boxWidth:12,boxHeight:12,borderRadius:3,useBorderRadius:true}}},scales:{x:{ticks:{color:tc,font:{size:11},maxRotation:45,autoSkip:true,maxTicksLimit:8},grid:{color:gc}},y:{ticks:{color:tc,font:{size:11},callback:v=>v>=1000?(v/1000).toFixed(0)+'k€':v+'€'},grid:{color:gc}}}};
+    window._c1=new Chart(document.getElementById('cc'),{type:'bar',data:{labels:l,datasets:[
+      {label:'MaFormation',data:${JSON.stringify(caMAF)},backgroundColor:'#545ac0',borderRadius:4,stack:'s'},
+      {label:'Google Ads',data:${JSON.stringify(caG)},backgroundColor:'#ea4335',borderRadius:4,stack:'s'},
+      {label:'Organic',data:${JSON.stringify(caO)},backgroundColor:'#1a9e6e',borderRadius:4,stack:'s'}
+    ]},options:{...bo,scales:{...bo.scales,x:{...bo.scales.x,stacked:true},y:{...bo.scales.y,stacked:true}}}});
+    const bo2={...bo,scales:{...bo.scales,y:{...bo.scales.y,ticks:{...bo.scales.y.ticks,callback:v=>v}}}};
     window._c2=new Chart(document.getElementById('cl'),{type:'line',data:{labels:l,datasets:[
-      {label:'Leads',data:ld,borderColor:'#545ac0',backgroundColor:'rgba(84,90,192,.1)',tension:.4,fill:true,pointRadius:4,pointBackgroundColor:'#545ac0'},
-      {label:'Coût TTC',data:cd,borderColor:'#ef7738',backgroundColor:'rgba(239,119,56,.05)',tension:.4,fill:false,pointRadius:4,pointBackgroundColor:'#ef7738',yAxisID:'y2'}
-    ]},options:{...bo,plugins:{legend:{display:true,labels:{color:tc,font:{size:12},boxWidth:12,boxHeight:12,borderRadius:3,useBorderRadius:true}}},scales:{...bo.scales,y2:{position:'right',ticks:{color:tc,font:{size:11},callback:v=>v>=1000?(v/1000).toFixed(0)+'k€':v+'€'},grid:{display:false}}}}});
+      {label:'MaFormation',data:${JSON.stringify(leadsMAF)},borderColor:'#545ac0',backgroundColor:'rgba(84,90,192,.08)',tension:.4,fill:true,pointRadius:3},
+      {label:'Google Ads',data:${JSON.stringify(leadsG)},borderColor:'#ea4335',backgroundColor:'rgba(234,67,53,.08)',tension:.4,fill:true,pointRadius:3},
+      {label:'Organic',data:${JSON.stringify(leadsO)},borderColor:'#1a9e6e',backgroundColor:'rgba(26,158,110,.08)',tension:.4,fill:true,pointRadius:3}
+    ]},options:bo2});
   })();<\/script>`;
 }
 
-function rMonthly(){
-  const m=filterMonthly();
-  const t=computeTotals(m);
-  const fl=hasFilters()?' · filtré':'';
+function rChannelGlobal(d){
+  const ch=d.channel; const t=d.totals; const monthly=filterMonthly(d.monthly);
+  const tf=computeTotals(monthly,d.has_costs);
+  const color=CH_CHART[ch];
+  const dk=matchMedia('(prefers-color-scheme:dark)').matches;
+  const tc=dk?'#8888a8':'#5e5e72',gc=dk?'rgba(255,255,255,.05)':'rgba(84,90,192,.06)';
+  const labels=monthly.map(r=>r.month),caD=monthly.map(r=>r.ca),lD=monthly.map(r=>r.nb_leads),cD=monthly.map(r=>r.cout_ttc||0);
+  const hasCosts=d.has_costs;
   return`<div class="content">
-    <div class="topbar"><div><div class="ttitle">Par mois${fl}</div><div class="tsub">Leads créés · Deals gagnés par date de gain · Coûts TTC</div></div><span class="tbadge">MaFormation</span></div>
-    <div class="accent-bar"></div>
-    ${m.length===0?'<div class="empty">Aucun résultat pour cette période.</div>':`
+    <div class="topbar">
+      <div><div class="ttitle">Vue globale${hasFilters()?' · filtré':''}</div><div class="tsub">Depuis ${A.data.data_start}${hasCosts?' · Coûts TTC (TVA 20%)':' · Pas de données de coût'}</div></div>
+      ${chBadge(ch)}
+    </div>
+    <div class="accent-bar ${ch}"></div>
+    <div class="kgrid">
+      <div class="kcard accent"><div class="klbl">Leads totaux</div><div class="kval">${fN(tf.nb_leads)}</div><div class="ksub">prospects + affaires</div></div>
+      <div class="kcard pos"><div class="klbl">Deals gagnés</div><div class="kval">${fN(tf.nb_deals_gagnes)}</div><div class="ksub">${fP(tf.nb_leads>0?tf.nb_deals_gagnes/tf.nb_leads*100:0)} conv.</div></div>
+      <div class="kcard"><div class="klbl">CA total</div><div class="kval" style="font-size:20px">${fE(tf.ca)}</div><div class="ksub">panier ${fE(tf.panier_moyen)}</div></div>
+      ${hasCosts?`
+      <div class="kcard"><div class="klbl">Coût TTC</div><div class="kval" style="font-size:20px">${fE(tf.cout_ttc)}</div><div class="ksub">HT ${fE(tf.cout_ht)}</div></div>
+      <div class="kcard accent2"><div class="klbl">CPL réel TTC</div><div class="kval" style="font-size:20px">${fE(tf.nb_leads>0?Math.round(tf.cout_ttc/tf.nb_leads):0)}</div><div class="ksub">coût / lead</div></div>
+      <div class="kcard accent2"><div class="klbl">CAC réel TTC</div><div class="kval" style="font-size:20px">${fE(tf.nb_deals_gagnes>0?Math.round(tf.cout_ttc/tf.nb_deals_gagnes):0)}</div><div class="ksub">CPL ÷ taux closing</div></div>
+      <div class="kcard pos"><div class="klbl">Bénéfice net</div><div class="kval" style="font-size:20px">${fE(tf.benefice_net)}</div></div>
+      <div class="kcard pos"><div class="klbl">ROI</div><div class="kval">${fR(tf.roi)}</div><div class="ksub">sur coût TTC</div></div>
+      `:`<div class="kcard" style="grid-column:span 2"><div class="klbl">Coûts</div><div class="kval" style="font-size:14px;color:var(--text3)">Import Google Ads CSV à venir</div></div>`}
+    </div>
     <div class="sec">
-      <div class="table-wrap"><table>
-        <thead><tr>
-          <th>Mois</th><th>Leads</th><th style="color:var(--text3)">Prospects</th><th style="color:var(--text3)">Affaires</th>
-          <th>Gagnés</th><th>Taux conv.</th><th>CA</th><th>Panier</th>
-          <th>Coût HT</th><th>Coût TTC</th><th style="color:var(--brand2)">CPL réel</th><th style="color:var(--brand2)">CAC réel</th><th>Bénéfice</th><th>ROI</th>
-        </tr></thead>
-        <tbody>
-          ${m.map(r=>`<tr>
-            <td><strong>${r.month}</strong></td>
-            <td><strong>${fN(r.nb_leads)}</strong></td>
-            <td style="color:var(--text3)">${fN(r.nb_prospects)}</td>
-            <td style="color:var(--text3)">${fN(r.nb_deals_crees)}</td>
-            <td>${fN(r.nb_deals_gagnes)}</td>
-            <td>${fP(r.nb_leads>0?r.nb_deals_gagnes/r.nb_leads*100:0)}</td>
-            <td><strong>${fE(r.ca)}</strong></td><td>${fE(r.panier_moyen)}</td>
-            <td style="color:var(--text3)">${fE(r.cout_ht)}</td>
-            <td>${fE(r.cout_ttc)}</td>
-            <td style="color:var(--brand2);font-weight:600">${fCpl(r.nb_leads>0?Math.round(r.cout_ttc/r.nb_leads):0)}</td>
-            <td style="color:var(--brand2);font-weight:600">${fCpl(r.nb_deals_gagnes>0?Math.round(r.cout_ttc/r.nb_deals_gagnes):0)}</td>
-            <td style="color:${r.benefice_net>=0?'var(--green)':'var(--red)'};font-weight:600">${fE(r.benefice_net)}</td>
-            <td>${rb(r.roi)}</td>
-          </tr>`).join('')}
-        </tbody>
-        <tfoot><tr class="tfoot">
-          <td>Total</td><td>${fN(t.nb_leads)}</td><td></td><td></td>
-          <td>${fN(t.nb_deals_gagnes)}</td>
-          <td>${fP(t.nb_leads>0?t.nb_deals_gagnes/t.nb_leads*100:0)}</td>
-          <td><strong>${fE(t.ca)}</strong></td><td>${fE(t.panier_moyen)}</td>
-          <td style="color:var(--text3)">${fE(t.cout_ht)}</td>
-          <td>${fE(t.cout_ttc)}</td>
-          <td style="color:var(--brand2);font-weight:600">${fCpl(t.nb_leads>0?Math.round(t.cout_ttc/t.nb_leads):0)}</td>
-          <td style="color:var(--brand2);font-weight:600">${fCpl(t.nb_deals_gagnes>0?Math.round(t.cout_ttc/t.nb_deals_gagnes):0)}</td>
-          <td style="color:${t.benefice_net>=0?'var(--green)':'var(--red)'};font-weight:600">${fE(t.benefice_net)}</td>
-          <td>${rb(t.roi)}</td>
-        </tr></tfoot>
-      </table></div>
-    </div>`}
+      <div class="sh"><span class="st">CA mensuel</span><span class="stag">par date de gain</span></div>
+      <div class="cw" style="height:220px"><canvas id="cc"></canvas></div>
+    </div>
+    <div class="sec">
+      <div class="sh"><span class="st">Leads par mois</span><span class="stag">par date de création</span></div>
+      <div class="cw" style="height:200px"><canvas id="cl"></canvas></div>
+    </div>
+  </div>
+  <script>(function(){
+    const tc='${tc}',gc='${gc}',color='${color}';
+    const l=${JSON.stringify(labels)},ca=${JSON.stringify(caD)},ld=${JSON.stringify(lD)},cd=${JSON.stringify(cD)};
+    const bo={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tc,font:{size:11},maxRotation:45,autoSkip:true,maxTicksLimit:8},grid:{color:gc}},y:{ticks:{color:tc,font:{size:11}},grid:{color:gc}}}};
+    if(window._c1)window._c1.destroy();if(window._c2)window._c2.destroy();
+    window._c1=new Chart(document.getElementById('cc'),{type:'bar',data:{labels:l,datasets:[{data:ca,backgroundColor:color,borderRadius:6}]},options:{...bo,scales:{...bo.scales,y:{...bo.scales.y,ticks:{...bo.scales.y.ticks,callback:v=>v>=1000?(v/1000).toFixed(0)+'k€':v+'€'}}}}});
+    const datasets2=[{label:'Leads',data:ld,borderColor:color,backgroundColor:color+'22',tension:.4,fill:true,pointRadius:4,pointBackgroundColor:color}];
+    if(${hasCosts})datasets2.push({label:'Coût TTC',data:cd,borderColor:'#ef7738',backgroundColor:'rgba(239,119,56,.05)',tension:.4,fill:false,pointRadius:3,yAxisID:'y2'});
+    window._c2=new Chart(document.getElementById('cl'),{type:'line',data:{labels:l,datasets:datasets2},options:{...bo,plugins:{legend:{display:${hasCosts},labels:{color:tc,font:{size:12},boxWidth:12,boxHeight:12,borderRadius:3,useBorderRadius:true}}},scales:{...bo.scales,${hasCosts?`y2:{position:'right',ticks:{color:tc,font:{size:11},callback:v=>v>=1000?(v/1000).toFixed(0)+'k€':v+'€'},grid:{display:false}}`:''}}}});
+  })();<\/script>`;
+}
+
+function rMonthly(d){
+  const monthly=filterMonthly(d.monthly);
+  const t=computeTotals(monthly,d.has_costs);
+  const hasCosts=d.has_costs; const ch=d.channel;
+  return`<div class="content">
+    <div class="topbar"><div><div class="ttitle">Par mois${hasFilters()?' · filtré':''}</div><div class="tsub">Leads créés · Deals gagnés par date de gain</div></div>${chBadge(ch)}</div>
+    <div class="accent-bar ${ch}"></div>
+    ${monthly.length===0?'<div class="empty">Aucun résultat.</div>':`
+    <div class="sec"><div class="table-wrap"><table>
+      <thead><tr>
+        <th>Mois</th><th>Leads</th><th style="opacity:.6">Prospects</th><th style="opacity:.6">Affaires</th>
+        <th>Gagnés</th><th>Taux conv.</th><th>CA</th><th>Panier</th>
+        ${hasCosts?`<th>Coût HT</th><th>Coût TTC</th><th style="color:var(--brand2)">CPL réel</th><th style="color:var(--brand2)">CAC réel</th><th>Bénéfice</th><th>ROI</th>`:''}
+      </tr></thead>
+      <tbody>${monthly.map(r=>`<tr>
+        <td><strong>${r.month}</strong></td>
+        <td><strong>${fN(r.nb_leads)}</strong></td>
+        <td style="color:var(--text3)">${fN(r.nb_prospects)}</td>
+        <td style="color:var(--text3)">${fN(r.nb_deals_crees)}</td>
+        <td>${fN(r.nb_deals_gagnes)}</td>
+        <td>${fP(r.nb_leads>0?r.nb_deals_gagnes/r.nb_leads*100:0)}</td>
+        <td><strong>${fE(r.ca)}</strong></td><td>${fE(r.panier_moyen)}</td>
+        ${hasCosts?`<td style="color:var(--text3)">${fE(r.cout_ht)}</td><td>${fE(r.cout_ttc)}</td>
+        <td style="color:var(--brand2);font-weight:600">${fE(r.nb_leads>0?Math.round(r.cout_ttc/r.nb_leads):0)}</td>
+        <td style="color:var(--brand2);font-weight:600">${fE(r.nb_deals_gagnes>0?Math.round(r.cout_ttc/r.nb_deals_gagnes):0)}</td>
+        <td style="color:${r.benefice_net>=0?'var(--green)':'var(--red)'};font-weight:600">${fE(r.benefice_net)}</td>
+        <td>${rb(r.roi)}</td>`:''}
+      </tr>`).join('')}</tbody>
+      <tfoot><tr class="tfoot">
+        <td>Total</td><td>${fN(t.nb_leads)}</td><td></td><td></td>
+        <td>${fN(t.nb_deals_gagnes)}</td>
+        <td>${fP(t.nb_leads>0?t.nb_deals_gagnes/t.nb_leads*100:0)}</td>
+        <td><strong>${fE(t.ca)}</strong></td><td>${fE(t.panier_moyen)}</td>
+        ${hasCosts?`<td style="color:var(--text3)">${fE(t.cout_ht)}</td><td>${fE(t.cout_ttc)}</td>
+        <td style="color:var(--brand2);font-weight:600">${fE(t.nb_leads>0?Math.round(t.cout_ttc/t.nb_leads):0)}</td>
+        <td style="color:var(--brand2);font-weight:600">${fE(t.nb_deals_gagnes>0?Math.round(t.cout_ttc/t.nb_deals_gagnes):0)}</td>
+        <td style="color:${t.benefice_net>=0?'var(--green)':'var(--red)'};font-weight:600">${fE(t.benefice_net)}</td>
+        <td>${rb(t.roi)}</td>`:''}
+      </tr></tfoot>
+    </table></div></div>`}
   </div>`;
 }
 
-function rCampaign(){
-  const c=sortedCampaigns();
-  const fl=hasFilters()?' · filtré':'';
-  const hasPeriod=A.f.monthFrom||A.f.monthTo;
-  const cols=[
-    {k:'campaign',l:'Campagne'},{k:'nb_leads',l:'Leads'},{k:'nb_deals_gagnes',l:'Gagnés'},
-    {k:'taux',l:'Taux'},{k:'ca',l:'CA'},{k:'panier_moyen',l:'Panier'},
-    {k:'cout_ht',l:'Coût HT'},{k:'cout_ttc',l:'Coût TTC'},
-    {k:'cpl_reel',l:'CPL réel'},{k:'cac_reel',l:'CAC réel'},
-    {k:'benefice_net',l:'Bénéfice'},{k:'roi',l:'ROI'}
+function rCampaign(d){
+  const ch=d.channel; const hasCosts=d.has_costs;
+  let camps=[...d.campaigns];
+  if(A.f.campaign)camps=camps.filter(r=>r.campaign===A.f.campaign);
+  const k=A.sort.key,dir=A.sort.dir==='desc'?-1:1;
+  camps=camps.map(r=>({...r,taux:r.nb_leads>0?r.nb_deals_gagnes/r.nb_leads*100:0,cpl_reel:r.nb_leads>0?Math.round(r.cout_ttc/r.nb_leads):0,cac_reel:r.nb_deals_gagnes>0?Math.round(r.cout_ttc/r.nb_deals_gagnes):0}))
+    .sort((a,b)=>{const av=a[k]??-Infinity,bv=b[k]??-Infinity;return typeof av==='string'?av.localeCompare(bv)*dir:(av-bv)*dir;});
+
+  const sortCols=hasCosts?[
+    {k:'campaign',l:'Campagne'},{k:'nb_leads',l:'Leads'},{k:'nb_deals_gagnes',l:'Gagnés'},{k:'taux',l:'Taux'},
+    {k:'ca',l:'CA'},{k:'panier_moyen',l:'Panier'},{k:'cout_ht',l:'Coût HT'},{k:'cout_ttc',l:'Coût TTC'},
+    {k:'cpl_reel',l:'CPL réel'},{k:'cac_reel',l:'CAC réel'},{k:'benefice_net',l:'Bénéfice'},{k:'roi',l:'ROI'}
+  ]:[
+    {k:'campaign',l:'Campagne'},{k:'nb_leads',l:'Leads'},{k:'nb_deals_gagnes',l:'Gagnés'},{k:'taux',l:'Taux'},
+    {k:'ca',l:'CA'},{k:'panier_moyen',l:'Panier'}
   ];
-  const thead=cols.map(({k,l})=>{
+
+  const thead=sortCols.map(({k,l})=>{
     const active=A.sort.key===k;
     const arrow=active?(A.sort.dir==='desc'?' &darr;':' &uarr;'):' <span style="opacity:.25">&updownarrow;</span>';
     return`<th onclick="sortBy('${k}')" style="cursor:pointer;user-select:none${active?';color:var(--brand)':''}">${l}${arrow}</th>`;
   }).join('');
+
   return`<div class="content">
     <div class="topbar">
-      <div><div class="ttitle">Par campagne${fl}</div>
-      <div class="tsub">${c.length} campagnes · triées par ${A.sort.key}${hasPeriod?' · <span style="color:var(--brand2)">filtre période non appliqué</span>':''}</div></div>
-      <span class="tbadge">MaFormation</span>
+      <div><div class="ttitle">Par campagne${hasFilters()?' · filtré':''}</div><div class="tsub">${camps.length} campagnes</div></div>
+      ${chBadge(ch)}
     </div>
-    <div class="accent-bar"></div>
-    ${c.length===0?'<div class="empty">Aucune campagne.</div>':`
-    <div class="sec">
-      <div class="table-wrap"><table>
-        <thead><tr>${thead}</tr></thead>
-        <tbody>${c.map(r=>`<tr>
-          <td class="tdt" title="${r.campaign}"><strong>${r.campaign}</strong></td>
-          <td>${fN(r.nb_leads)}</td><td>${fN(r.nb_deals_gagnes)}</td>
-          <td>${fP(r.taux)}</td>
-          <td><strong>${fE(r.ca)}</strong></td><td>${fE(r.panier_moyen)}</td>
-          <td style="color:var(--text3)">${fE(r.cout_ht)}</td>
-          <td>${fE(r.cout_ttc)}</td>
-          <td style="color:var(--brand2);font-weight:600">${fCpl(r.cpl_reel)}</td>
-          <td style="color:var(--brand2);font-weight:600">${fCpl(r.cac_reel)}</td>
-          <td style="color:${r.benefice_net>=0?'var(--green)':'var(--red)'};font-weight:600">${fE(r.benefice_net)}</td>
-          <td>${rb(r.roi)}</td>
-        </tr>`).join('')}</tbody>
-      </table></div>
-    </div>`}
+    <div class="accent-bar ${ch}"></div>
+    ${camps.length===0?'<div class="empty">Aucune campagne.</div>':`
+    <div class="sec"><div class="table-wrap"><table>
+      <thead><tr>${thead}</tr></thead>
+      <tbody>${camps.map(r=>`<tr>
+        <td class="tdt" title="${r.campaign}"><strong>${r.campaign}</strong></td>
+        <td>${fN(r.nb_leads)}</td><td>${fN(r.nb_deals_gagnes)}</td>
+        <td>${fP(r.taux)}</td>
+        <td><strong>${fE(r.ca)}</strong></td><td>${fE(r.panier_moyen)}</td>
+        ${hasCosts?`<td style="color:var(--text3)">${fE(r.cout_ht)}</td>
+        <td>${fE(r.cout_ttc)}</td>
+        <td style="color:var(--brand2);font-weight:600">${fE(r.cpl_reel)}</td>
+        <td style="color:var(--brand2);font-weight:600">${fE(r.cac_reel)}</td>
+        <td style="color:${r.benefice_net>=0?'var(--green)':'var(--red)'};font-weight:600">${fE(r.benefice_net)}</td>
+        <td>${rb(r.roi)}</td>`:''}
+      </tr>`).join('')}</tbody>
+    </table></div></div>`}
   </div>`;
+}
+
+function sortBy(key){
+  A.sort.key===key?(A.sort.dir=A.sort.dir==='desc'?'asc':'desc'):(A.sort.key=key,A.sort.dir='desc');
+  render();
 }
 
 function render(){
   const main=document.getElementById('main');
-  if(!A.data&&A.view!=='import'){setView('import');return;}
+  if(!A.data){main.innerHTML=rNoData();return;}
+  const d=getCurrentData();
   let html=renderFilterBar();
-  if(A.view==='import')html=rImport();
-  else if(A.view==='global')html+=rGlobal();
-  else if(A.view==='monthly')html+=rMonthly();
-  else if(A.view==='campaign')html+=rCampaign();
+  if(A.ch==='all'){
+    if(A.view==='global')html+=rGlobalAll();
+    else if(A.view==='monthly'){
+      // Vue mensuelle combinée tous canaux
+      const chs=A.data.channels;
+      const allM=[...new Set(Object.values(chs).flatMap(c=>c.monthly.map(r=>r.month)))].sort();
+      const combined=allM.map(m=>{
+        const rows=Object.values(chs).map(c=>c.monthly.find(r=>r.month===m)||{nb_leads:0,nb_deals_crees:0,nb_prospects:0,nb_deals_gagnes:0,ca:0,cout_ht:0,cout_ttc:0,panier_moyen:0});
+        const nb_leads=rows.reduce((s,r)=>s+r.nb_leads,0);
+        const nb_won=rows.reduce((s,r)=>s+r.nb_deals_gagnes,0);
+        const ca=rows.reduce((s,r)=>s+r.ca,0);
+        return{month:m,nb_leads,nb_prospects:0,nb_deals_crees:0,nb_deals_gagnes:nb_won,ca,cout_ht:0,cout_ttc:0,panier_moyen:nb_won>0?ca/nb_won:0,benefice_net:ca};
+      });
+      const fakeCh={channel:'all',has_costs:false,monthly:combined,campaigns:[]};
+      html+=rMonthly(fakeCh);
+    }
+    else html+=`<div class="content"><div class="empty">Sélectionnez un canal pour voir le détail par campagne.</div></div>`;
+  } else if(d){
+    if(A.view==='global')html+=rChannelGlobal(d);
+    else if(A.view==='monthly')html+=rMonthly(d);
+    else if(A.view==='campaign')html+=rCampaign(d);
+  }
   main.innerHTML=html;
   main.querySelectorAll('script').forEach(s=>{const ns=document.createElement('script');ns.textContent=s.textContent;s.replaceWith(ns);});
-  if(A.view==='import')setupDrop();
-  const fc=document.getElementById('fcount');
-  if(fc&&A.data){const m=filterMonthly();if(hasFilters())fc.textContent=`${m.reduce((s,r)=>s+r.nb_leads,0)} leads · ${m.reduce((s,r)=>s+r.nb_deals_gagnes,0)} gagnés`;}
 }
 
 function handleF(input){
@@ -560,39 +579,14 @@ function handleF(input){
   const r=new FileReader();r.onload=e=>loadJSON(e.target.result);r.readAsText(f);
 }
 
-function setupDrop(){
-  const z=document.getElementById('dz');if(!z)return;
-  z.addEventListener('dragover',e=>{e.preventDefault();z.classList.add('drag');});
-  z.addEventListener('dragleave',()=>z.classList.remove('drag'));
-  z.addEventListener('drop',e=>{e.preventDefault();z.classList.remove('drag');const f=e.dataTransfer.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>loadJSON(ev.target.result);r.readAsText(f);});
-}
-
-// Charger les données depuis GitHub (fichier dans le repo)
+// Charger depuis serveur puis localStorage
 (function(){
-  const slbl = document.getElementById('slbl');
-  slbl.textContent = 'Chargement...';
-  fetch('/pipedrive_data.json?t=' + Date.now())
-    .then(r => { if(!r.ok) throw new Error('Fichier introuvable'); return r.json(); })
-    .then(data => {
-      A.data = data;
-      A.view = 'global';
-      slbl.textContent = 'Maj ' + (data.generated_at||'');
-      // Sauvegarder aussi en localStorage comme fallback
-      try{ localStorage.setItem('oellear_roi_data', JSON.stringify(data)); }catch(e){}
-      render();
-    })
-    .catch(() => {
-      // Fallback localStorage si pas de fichier sur le serveur
-      try{
-        const saved = localStorage.getItem('oellear_roi_data');
-        if(saved){
-          A.data = JSON.parse(saved);
-          slbl.textContent = 'Maj ' + (A.data.generated_at||'') + ' (local)';
-          A.view = 'global';
-        } else {
-          slbl.textContent = 'Aucune donnée';
-        }
-      }catch(e){}
+  const slbl=document.getElementById('slbl');
+  fetch('/pipedrive_data.json?t='+Date.now())
+    .then(r=>{if(!r.ok)throw new Error();return r.json();})
+    .then(data=>{A.data=data;slbl.textContent='Maj '+(data.generated_at||'');try{localStorage.setItem('oellear_roi_data',JSON.stringify(data));}catch(e){}render();})
+    .catch(()=>{
+      try{const s=localStorage.getItem('oellear_roi_data');if(s){A.data=JSON.parse(s);slbl.textContent='Maj '+(A.data.generated_at||'')+' (local)';}}catch(e){}
       render();
     });
 })();
