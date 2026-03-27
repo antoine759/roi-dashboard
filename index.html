@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -19,6 +20,9 @@
       --ch-maf:#545ac0;--ch-maf-bg:#eeeffe;
       --ch-google:#ea4335;--ch-google-bg:#fdecea;
       --ch-organic:#1a9e6e;--ch-organic-bg:#e6f7f1;
+      --ch-tma:#854F0B;--ch-tma-bg:#FAEEDA;
+      --ch-inbound:#185FA5;--ch-inbound-bg:#E6F1FB;
+      --ch-autres:#5F5E5A;--ch-autres-bg:#F1EFE8;
     }
     @media(prefers-color-scheme:dark){:root{
       --bg:#13131a;--bg2:#1c1c26;--bg3:#22222f;
@@ -53,11 +57,17 @@
     .ch-tab.active.maf{background:var(--ch-maf-bg);color:var(--ch-maf);}
     .ch-tab.active.google{background:var(--ch-google-bg);color:var(--ch-google);}
     .ch-tab.active.organic{background:var(--ch-organic-bg);color:var(--ch-organic);}
+    .ch-tab.active.tma{background:var(--ch-tma-bg);color:var(--ch-tma);}
+    .ch-tab.active.inbound{background:var(--ch-inbound-bg);color:var(--ch-inbound);}
+    .ch-tab.active.autres{background:var(--ch-autres-bg);color:var(--ch-autres);}
     .ch-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
     .ch-tab.all .ch-dot{background:linear-gradient(135deg,var(--brand),var(--brand2));}
     .ch-tab.maf .ch-dot{background:var(--ch-maf);}
     .ch-tab.google .ch-dot{background:var(--ch-google);}
     .ch-tab.organic .ch-dot{background:var(--ch-organic);}
+    .ch-tab.tma .ch-dot{background:var(--ch-tma);}
+    .ch-tab.inbound .ch-dot{background:var(--ch-inbound);}
+    .ch-tab.autres .ch-dot{background:var(--ch-autres);}
     .sfooter{padding:14px 16px;border-top:1px solid var(--border);font-size:12px;color:var(--text3);display:flex;flex-direction:column;gap:10px;}
     .sfooter-status{display:flex;align-items:center;gap:8px;}
     .sdot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0;box-shadow:0 0 0 3px var(--green-bg);}
@@ -90,6 +100,9 @@
     .accent-bar{height:4px;background:linear-gradient(90deg,var(--brand),var(--brand2));margin-bottom:28px;border-radius:var(--r);}
     .accent-bar.google{background:linear-gradient(90deg,#ea4335,#fbbc04);}
     .accent-bar.organic{background:linear-gradient(90deg,#1a9e6e,#4dd4a0);}
+    .accent-bar.tma{background:linear-gradient(90deg,#854F0B,#EF9F27);}
+    .accent-bar.inbound{background:linear-gradient(90deg,#185FA5,#378ADD);}
+    .accent-bar.autres{background:linear-gradient(90deg,#5F5E5A,#888780);}
     .kgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:14px;margin-bottom:28px;}
     .kcard{background:var(--bg);border:1px solid var(--border);border-radius:var(--rl);padding:18px 20px;box-shadow:var(--shadow);transition:transform .15s;position:relative;overflow:hidden;}
     .kcard::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--border);}
@@ -185,6 +198,9 @@
     <div class="ch-tab maf" onclick="setCh('maformation')"><span class="ch-dot"></span>MaFormation</div>
     <div class="ch-tab google" onclick="setCh('google')"><span class="ch-dot"></span>Google Ads</div>
     <div class="ch-tab organic" onclick="setCh('organic')"><span class="ch-dot"></span>Organic</div>
+    <div class="ch-tab tma" onclick="setCh('tma')"><span class="ch-dot"></span>TMA</div>
+    <div class="ch-tab inbound" onclick="setCh('inbound')"><span class="ch-dot"></span>Inbound</div>
+    <div class="ch-tab autres" onclick="setCh('autres')"><span class="ch-dot"></span>Autres</div>
   </div>
   <div class="sfooter">
     <div class="sfooter-status"><span class="sdot"></span><span id="slbl">Chargement...</span></div>
@@ -212,9 +228,9 @@ function rb(roi){
   return`<span class="badge br">${fR(roi)}</span>`;
 }
 
-const CH_LABELS={all:'Tous les canaux',maformation:'MaFormation',google:'Google Ads',organic:'Organic'};
-const CH_COLORS={all:'var(--brand)',maformation:'var(--ch-maf)',google:'var(--ch-google)',organic:'var(--ch-organic)'};
-const CH_CHART={all:'#545ac0',maformation:'#545ac0',google:'#ea4335',organic:'#1a9e6e'};
+const CH_LABELS={all:'Tous les canaux',maformation:'MaFormation',google:'Google Ads',organic:'Organic',tma:'TMA',inbound:'Inbound',autres:'Autres'};
+const CH_COLORS={all:'var(--brand)',maformation:'var(--ch-maf)',google:'var(--ch-google)',organic:'var(--ch-organic)',tma:'var(--ch-tma)',inbound:'var(--ch-inbound)',autres:'var(--ch-autres)'};
+const CH_CHART={all:'#545ac0',maformation:'#545ac0',google:'#ea4335',organic:'#1a9e6e',tma:'#854F0B',inbound:'#185FA5',autres:'#5F5E5A'};
 
 function getCurrentData(){
   if(!A.data)return null;
@@ -225,7 +241,7 @@ function getCurrentData(){
 function setCh(ch){
   A.ch=ch;
   document.querySelectorAll('.ch-tab').forEach(el=>el.classList.remove('active'));
-  document.querySelectorAll('.ch-tab')[['all','maformation','google','organic'].indexOf(ch)]?.classList.add('active');
+  document.querySelectorAll('.ch-tab')[['all','maformation','google','organic','tma','inbound','autres'].indexOf(ch)]?.classList.add('active');
   A.f={monthFrom:'',monthTo:'',campaign:''};
   render();
 }
@@ -331,20 +347,27 @@ function rGlobalAll(){
 
   // Build combined monthly for chart
   const allMonths=[...new Set(Object.values(chs).flatMap(c=>c.monthly.map(r=>r.month)))].sort().filter(m=>!A.f.monthFrom||m>=A.f.monthFrom).filter(m=>!A.f.monthTo||m<=A.f.monthTo);
-  const mafM=chs.maformation?.monthly||[]; const gM=chs.google?.monthly||[]; const oM=chs.organic?.monthly||[];
+  const mafM=chs.maformation?.monthly||[]; const gM=chs.google?.monthly||[]; const oM=chs.organic?.monthly||[]; const tmaM=chs.tma?.monthly||[]; const inbM=chs.inbound?.monthly||[]; const autM=chs.autres?.monthly||[];
   const getData=(arr,month)=>arr.find(r=>r.month===month);
 
   const caMAF=allMonths.map(m=>getData(mafM,m)?.ca||0);
   const caG=allMonths.map(m=>getData(gM,m)?.ca||0);
   const caO=allMonths.map(m=>getData(oM,m)?.ca||0);
+  const caTMA=allMonths.map(m=>getData(tmaM,m)?.ca||0);
+  const caINB=allMonths.map(m=>getData(inbM,m)?.ca||0);
+  const caAUT=allMonths.map(m=>getData(autM,m)?.ca||0);
   const leadsMAF=allMonths.map(m=>getData(mafM,m)?.nb_leads||0);
   const leadsG=allMonths.map(m=>getData(gM,m)?.nb_leads||0);
   const leadsO=allMonths.map(m=>getData(oM,m)?.nb_leads||0);
+  const leadsTMA=allMonths.map(m=>getData(tmaM,m)?.nb_leads||0);
+  const leadsINB=allMonths.map(m=>getData(inbM,m)?.nb_leads||0);
+  const leadsAUT=allMonths.map(m=>getData(autM,m)?.nb_leads||0);
 
-  const totalCA=chs.maformation.totals.ca+chs.google.totals.ca+chs.organic.totals.ca;
-  const totalLeads=chs.maformation.totals.nb_leads+chs.google.totals.nb_leads+chs.organic.totals.nb_leads;
-  const totalWon=chs.maformation.totals.nb_deals_gagnes+chs.google.totals.nb_deals_gagnes+chs.organic.totals.nb_deals_gagnes;
-  const totalCout=chs.maformation.totals.cout_ttc;
+  const allChs=Object.values(chs);
+  const totalCA=allChs.reduce((s,c)=>s+c.totals.ca,0);
+  const totalLeads=allChs.reduce((s,c)=>s+c.totals.nb_leads,0);
+  const totalWon=allChs.reduce((s,c)=>s+c.totals.nb_deals_gagnes,0);
+  const totalCout=allChs.reduce((s,c)=>s+c.totals.cout_ttc,0);
 
   return`<div class="content">
     <div class="topbar">
@@ -356,10 +379,10 @@ function rGlobalAll(){
       <div class="kcard accent"><div class="klbl">Leads totaux</div><div class="kval">${fN(totalLeads)}</div><div class="ksub">tous canaux</div></div>
       <div class="kcard pos"><div class="klbl">Deals gagnés</div><div class="kval">${fN(totalWon)}</div><div class="ksub">${fP(totalLeads>0?totalWon/totalLeads*100:0)} conv.</div></div>
       <div class="kcard"><div class="klbl">CA total</div><div class="kval" style="font-size:20px">${fE(totalCA)}</div></div>
-      <div class="kcard accent2"><div class="klbl">Coût TTC (MaForm.)</div><div class="kval" style="font-size:20px">${fE(totalCout)}</div><div class="ksub">Google Ads à venir</div></div>
+      <div class="kcard accent2"><div class="klbl">Coût TTC total</div><div class="kval" style="font-size:20px">${fE(totalCout)}</div><div class="ksub">MaForm. + Google Ads</div></div>
     </div>
     <div class="compare-grid">
-      ${['maformation','google','organic'].map(ch=>{
+      ${['maformation','google','organic','tma','inbound','autres'].map(ch=>{
         const d=chs[ch]; const t=d.totals; const color=CH_COLORS[ch];
         return`<div class="compare-card">
           <div class="compare-card-header">${chBadge(ch)}<button onclick="setCh('${ch}')" style="font-size:12px;color:var(--text3);background:none;border:none;cursor:pointer;text-decoration:underline">Voir détail →</button></div>
@@ -389,13 +412,19 @@ function rGlobalAll(){
     window._c1=new Chart(document.getElementById('cc'),{type:'bar',data:{labels:l,datasets:[
       {label:'MaFormation',data:${JSON.stringify(caMAF)},backgroundColor:'#545ac0',borderRadius:4,stack:'s'},
       {label:'Google Ads',data:${JSON.stringify(caG)},backgroundColor:'#ea4335',borderRadius:4,stack:'s'},
-      {label:'Organic',data:${JSON.stringify(caO)},backgroundColor:'#1a9e6e',borderRadius:4,stack:'s'}
+      {label:'Organic',data:${JSON.stringify(caO)},backgroundColor:'#1a9e6e',borderRadius:4,stack:'s'},
+      {label:'TMA',data:${JSON.stringify(caTMA)},backgroundColor:'#854F0B',borderRadius:4,stack:'s'},
+      {label:'Inbound',data:${JSON.stringify(caINB)},backgroundColor:'#185FA5',borderRadius:4,stack:'s'},
+      {label:'Autres',data:${JSON.stringify(caAUT)},backgroundColor:'#5F5E5A',borderRadius:4,stack:'s'}
     ]},options:{...bo,scales:{...bo.scales,x:{...bo.scales.x,stacked:true},y:{...bo.scales.y,stacked:true}}}});
     const bo2={...bo,scales:{...bo.scales,y:{...bo.scales.y,ticks:{...bo.scales.y.ticks,callback:v=>v}}}};
     window._c2=new Chart(document.getElementById('cl'),{type:'line',data:{labels:l,datasets:[
       {label:'MaFormation',data:${JSON.stringify(leadsMAF)},borderColor:'#545ac0',backgroundColor:'rgba(84,90,192,.08)',tension:.4,fill:true,pointRadius:3},
       {label:'Google Ads',data:${JSON.stringify(leadsG)},borderColor:'#ea4335',backgroundColor:'rgba(234,67,53,.08)',tension:.4,fill:true,pointRadius:3},
-      {label:'Organic',data:${JSON.stringify(leadsO)},borderColor:'#1a9e6e',backgroundColor:'rgba(26,158,110,.08)',tension:.4,fill:true,pointRadius:3}
+      {label:'Organic',data:${JSON.stringify(leadsO)},borderColor:'#1a9e6e',backgroundColor:'rgba(26,158,110,.08)',tension:.4,fill:true,pointRadius:3},
+      {label:'TMA',data:${JSON.stringify(leadsTMA)},borderColor:'#854F0B',backgroundColor:'rgba(133,79,11,.08)',tension:.4,fill:true,pointRadius:3},
+      {label:'Inbound',data:${JSON.stringify(leadsINB)},borderColor:'#185FA5',backgroundColor:'rgba(24,95,165,.08)',tension:.4,fill:true,pointRadius:3},
+      {label:'Autres',data:${JSON.stringify(leadsAUT)},borderColor:'#5F5E5A',backgroundColor:'rgba(95,94,90,.08)',tension:.4,fill:true,pointRadius:3}
     ]},options:bo2});
   })();<\/script>`;
 }
