@@ -529,8 +529,35 @@ function getChData(key) {
     if (months.indexOf(ch.monthly[i].month)>=0) filteredMonthly.push(ch.monthly[i]);
   }
   agg.monthly = filteredMonthly;
-  agg.campaigns = ch.campaigns;
   agg.has_costs = ch.has_costs;
+  // Scale campaigns proportionally when a filter is active
+  var camps = (ch.campaigns || []).slice();
+  var isFiltered = months.length < allM.length;
+  if (isFiltered && camps.length > 0) {
+    var totalAgg = aggMonthly(ch, allM);
+    var rLeads = totalAgg.nb_leads > 0 ? agg.nb_leads / totalAgg.nb_leads : 0;
+    var rClients = totalAgg.nb_deals_gagnes > 0 ? agg.nb_deals_gagnes / totalAgg.nb_deals_gagnes : 0;
+    var rCA = totalAgg.ca > 0 ? agg.ca / totalAgg.ca : 0;
+    var rCost = ch.has_costs && totalAgg.cout_ttc > 0 ? agg.cout_ttc / totalAgg.cout_ttc : 0;
+    camps = camps.map(function(c) {
+      var s = {};
+      for (var k in c) s[k] = c[k];
+      s.nb_leads = Math.round((c.nb_leads || 0) * rLeads);
+      s.nb_deals_gagnes = Math.round((c.nb_deals_gagnes || 0) * rClients);
+      s.ca = Math.round((c.ca || 0) * rCA);
+      if (ch.has_costs) {
+        s.cout_ttc = Math.round((c.cout_ttc || 0) * rCost * 100) / 100;
+        s.cout_ht = s.cout_ttc / 1.2;
+        s.benefice_net = s.ca - s.cout_ttc;
+        s.roi = s.cout_ttc > 0 ? (s.ca - s.cout_ttc) / s.cout_ttc * 100 : null;
+        s.cpl_reel = s.nb_leads > 0 ? s.cout_ttc / s.nb_leads : null;
+        s.cac_reel = s.nb_deals_gagnes > 0 ? s.cout_ttc / s.nb_deals_gagnes : null;
+      }
+      return s;
+    });
+  }
+  agg.campaigns = camps;
+  agg.isScaled = isFiltered;
   return agg;
 }
 
@@ -766,7 +793,9 @@ function roiRenderChannel(key) {
     camps.sort(function(a,b){ var va=a[campSortKey]||0,vb=b[campSortKey]||0; return (va-vb)*campSortDir; });
     var maxCA3 = 0;
     for (var i=0;i<camps.length;i++) { if((camps[i].ca||0)>maxCA3) maxCA3=camps[i].ca||0; }
-    html += '<div class="tcard"><div class="tbar"><span class="ttl">'+(key==='google'?'Campagnes Google Ads':'Sources / Campagnes')+' ('+camps.length+')</span></div>';
+    var campTitle = (key==='google'?'Campagnes Google Ads':'Sources / Campagnes')+' ('+camps.length+')';
+  var scaledNote = d.isScaled ? ' <span style="font-size:10px;color:var(--m);font-weight:400">* estim&eacute; proportionnellement</span>' : '';
+  html += '<div class="tcard"><div class="tbar"><span class="ttl">'+campTitle+scaledNote+'</span></div>';
     html += '<div class="tscroll"><table><thead><tr>';
     html += '<th onclick="campSrt(\'campaign\')">Nom &#8597;</th>';
     html += '<th onclick="campSrt(\'nb_leads\')" style="text-align:right">Leads &#8597;</th>';
