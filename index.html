@@ -501,29 +501,32 @@ tr:hover td{background:#fafbff;}
       <!-- GRAPHES pleine largeur -->
       <div style="padding:16px 24px;display:flex;flex-direction:column;gap:16px">
         <div class="ccard">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">
-            <div><div class="cttl">Nouveaux dossiers inscrits</div><div class="csub">Par date d&#39;inscription Airtable</div></div>
-            <div style="display:flex;gap:4px">
-              <button id="cl-nav-i-prev" onclick="clNavInscr(-1)" class="cl-nav-btn">&#8592;</button>
-              <button id="cl-nav-i-next" onclick="clNavInscr(1)"  class="cl-nav-btn">&#8594;</button>
-            </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+            <div><div class="cttl">Nouveaux dossiers inscrits / mois</div><div class="csub" id="cl-inscr-sub">D&#233;c 2024 &rarr; Avr 2026 &mdash; tous</div></div>
+            <span class="fresult" id="cl-inscr-total" style="font-size:11px"></span>
           </div>
-          <div style="position:relative;height:190px"><canvas id="cl-cInscr"></canvas></div>
+          <div style="position:relative;height:200px"><canvas id="cl-cInscr"></canvas></div>
         </div>
         <div class="ccard">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">
-            <div><div class="cttl">CA mensuel &mdash; r&#233;alis&#233; &amp; estim&#233;</div><div class="csub">Bas&#233; sur la date d&#39;entr&#233;e en session</div></div>
-            <div style="display:flex;gap:4px">
-              <button id="cl-nav-ca-prev" onclick="clNavCA(-1)" class="cl-nav-btn">&#8592;</button>
-              <button id="cl-nav-ca-next" onclick="clNavCA(1)"  class="cl-nav-btn">&#8594;</button>
-            </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+            <div><div class="cttl">CA mensuel &mdash; r&#233;alis&#233; &amp; estim&#233;</div><div class="csub" id="cl-ca-sub">Bas&#233; sur la date d&#39;entr&#233;e en session</div></div>
+            <span class="fresult" id="cl-ca-total" style="font-size:11px"></span>
           </div>
-          <div style="position:relative;height:190px"><canvas id="cl-cCA"></canvas></div>
+          <div style="position:relative;height:200px"><canvas id="cl-cCA"></canvas></div>
         </div>
-        <div class="ccard">
-          <div class="cttl">R&#233;partition par certification</div>
-          <div class="csub">Vue globale : volume par certif &mdash; Vue filtr&#233;e : statuts</div>
-          <div style="position:relative;height:170px"><canvas id="cl-cCertifs"></canvas></div>
+        <div class="crow c22" style="margin-bottom:0">
+          <div class="ccard">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+              <div><div class="cttl">R&#233;partition des certifications</div><div class="csub">Volume par certification</div></div>
+            </div>
+            <div style="position:relative;height:180px"><canvas id="cl-cCertifs"></canvas></div>
+          </div>
+          <div class="ccard">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+              <div><div class="cttl">Statuts des dossiers</div><div class="csub" id="cl-statuts-sub">Distribution globale</div></div>
+            </div>
+            <div style="position:relative;height:180px"><canvas id="cl-cStatuts"></canvas></div>
+          </div>
         </div>
       </div>
     </div>
@@ -1591,14 +1594,6 @@ function clWinSlice(moisList, pos){
   return filtered.slice(pos, pos + CL_WIN_SIZE);
 }
 
-function clNavInscr(dir){
-  var filtered = clMoisFilter(ALL_MOIS_INSCR);
-  var max = Math.max(0, filtered.length - CL_WIN_SIZE);
-  CL_WIN_POS_I = Math.max(0, Math.min(max, CL_WIN_POS_I + dir * 3));
-  clRefreshInscr();
-  clUpdateNavBtns();
-}
-
 function clNavCA(dir){
   var filtered = clMoisFilter(ALL_MOIS_CA);
   var max = Math.max(0, filtered.length - CL_WIN_SIZE);
@@ -1608,16 +1603,10 @@ function clNavCA(dir){
 }
 
 function clUpdateNavBtns(){
-  var fi = clMoisFilter(ALL_MOIS_INSCR);
   var fc = clMoisFilter(ALL_MOIS_CA);
-  var maxI = Math.max(0, fi.length - CL_WIN_SIZE);
   var maxC = Math.max(0, fc.length - CL_WIN_SIZE);
-  var btnIPrev = document.getElementById('cl-nav-i-prev');
-  var btnINext = document.getElementById('cl-nav-i-next');
   var btnCPrev = document.getElementById('cl-nav-ca-prev');
   var btnCNext = document.getElementById('cl-nav-ca-next');
-  if(btnIPrev) btnIPrev.disabled = CL_WIN_POS_I <= 0;
-  if(btnINext) btnINext.disabled = CL_WIN_POS_I >= maxI;
   if(btnCPrev) btnCPrev.disabled = CL_WIN_POS_CA <= 0;
   if(btnCNext) btnCNext.disabled = CL_WIN_POS_CA >= maxC;
 }
@@ -1625,13 +1614,30 @@ function clUpdateNavBtns(){
 function clRefreshInscr(){
   if(!clCharts['cl-cInscr']) return;
   var f = CL_FILTER;
-  var srcI = CL_INSCR[f] || CL_INSCR.all;
-  var mois = clWinSlice(ALL_MOIS_INSCR, CL_WIN_POS_I);
-  var colMap = {'fa':'rgba(239,119,56,0.7)','bim':'rgba(84,90,192,0.7)','ia':'rgba(14,165,160,0.7)','all':'rgba(84,90,192,0.65)'};
-  var col = colMap[f] || colMap.all;
-  clCharts['cl-cInscr'].data.labels = mois.map(clFmt);
-  clCharts['cl-cInscr'].data.datasets[0].data = mois.map(function(m){return srcI[m]||0;});
-  clCharts['cl-cInscr'].data.datasets[0].backgroundColor = col;
+  var mois = clMoisFilter(ALL_MOIS_INSCR);
+  if(f === 'all'){
+    clCharts['cl-cInscr'].data.labels = mois.map(clFmt);
+    clCharts['cl-cInscr'].data.datasets[0].data = mois.map(function(m){return CL_INSCR.fa[m]||0;});
+    clCharts['cl-cInscr'].data.datasets[1].data = mois.map(function(m){return CL_INSCR.bim[m]||0;});
+    clCharts['cl-cInscr'].data.datasets[2].data = mois.map(function(m){return CL_INSCR.ia[m]||0;});
+    clCharts['cl-cInscr'].data.datasets[3].data = mois.map(function(m){return (CL_INSCR.fa[m]||0)+(CL_INSCR.bim[m]||0)+(CL_INSCR.ia[m]||0);});
+  } else {
+    var src = CL_INSCR[f] || CL_INSCR.all;
+    clCharts['cl-cInscr'].data.labels = mois.map(clFmt);
+    var colMap = {'fa':'rgba(239,119,56,0.75)','bim':'rgba(99,102,241,0.75)','ia':'rgba(14,165,160,0.75)'};
+    var col = colMap[f] || 'rgba(99,102,241,0.75)';
+    clCharts['cl-cInscr'].data.datasets[0].data = mois.map(function(m){return src[m]||0;});
+    clCharts['cl-cInscr'].data.datasets[1].data = mois.map(function(){return 0;});
+    clCharts['cl-cInscr'].data.datasets[2].data = mois.map(function(){return 0;});
+    clCharts['cl-cInscr'].data.datasets[3].data = mois.map(function(m){return src[m]||0;});
+    clCharts['cl-cInscr'].data.datasets[0].backgroundColor = col;
+  }
+  // Mettre a jour le total
+  var total = clCharts['cl-cInscr'].data.datasets[3].data.reduce(function(a,b){return a+(b||0);},0);
+  var sub = document.getElementById('cl-inscr-sub');
+  if(sub) sub.textContent = (f==='all'?'Tous':CL_LABELS[f]?CL_LABELS[f].nom:f)+' — '+mois.length+' mois';
+  var tot = document.getElementById('cl-inscr-total');
+  if(tot) tot.textContent = total+' dossiers';
   clCharts['cl-cInscr'].update();
 }
 
@@ -1639,37 +1645,50 @@ function clRefreshCA(){
   if(!clCharts['cl-cCA']) return;
   var f = CL_FILTER;
   var srcCA = CL_CA[f] || CL_CA.all;
-  var col = {'fa':'rgba(239,119,56,0.85)','bim':'rgba(84,90,192,0.85)','ia':'rgba(14,165,160,0.85)','all':'rgba(99,102,241,0.85)'}[f] || 'rgba(99,102,241,0.85)';
-  var mois = clWinSlice(ALL_MOIS_CA, CL_WIN_POS_CA);
+  var mois = clMoisFilter(ALL_MOIS_CA);
+  if(CL_PERIOD === 'all'){
+    mois = mois.slice(Math.max(0, mois.length - CL_WIN_SIZE));
+  }
   var labels = mois.map(clFmt);
   var realise = mois.map(function(m){return MOIS_FUTUR.indexOf(m)===-1 ? srcCA[m]||0 : null;});
   var estime  = mois.map(function(m){return MOIS_FUTUR.indexOf(m)>=0  ? srcCA[m]||0 : null;});
+  var colR = {'fa':'rgba(239,119,56,0.85)','bim':'rgba(99,102,241,0.85)','ia':'rgba(14,165,160,0.85)','all':'rgba(99,102,241,0.85)'}[f]||'rgba(99,102,241,0.85)';
   clCharts['cl-cCA'].data.labels = labels;
   clCharts['cl-cCA'].data.datasets[0].data = realise;
   clCharts['cl-cCA'].data.datasets[1].data = estime;
-  clCharts['cl-cCA'].data.datasets[0].backgroundColor = col;
+  clCharts['cl-cCA'].data.datasets[0].backgroundColor = colR;
   clCharts['cl-cCA'].update();
+  // Mettre a jour le total
+  var total = mois.reduce(function(acc,m){return acc+(srcCA[m]||0);},0);
+  var totEl = document.getElementById('cl-ca-total');
+  if(totEl) totEl.textContent = (total/1000).toFixed(0)+'k\u20ac';
+  var sub = document.getElementById('cl-ca-sub');
+  if(sub) sub.textContent = (f==='all'?'Toutes certifications':CL_LABELS[f]?CL_LABELS[f].nom:f)+' \u2014 '+mois.length+' mois';
 }
 
 function clRefreshCertifs(){
   if(!clCharts['cl-cCertifs']) return;
   var f = CL_FILTER;
   if(f === 'all'){
-    // Donut avec total par certif
-    clCharts['cl-cCertifs'].data.labels = ['Fab. Additive','BIM','IA P\u00e9da'];
+    clCharts['cl-cCertifs'].data.labels = ['Fab. Additive (1 810)','BIM (483)','IA (39)'];
     clCharts['cl-cCertifs'].data.datasets[0].data = [1810,483,39];
-    clCharts['cl-cCertifs'].data.datasets[0].backgroundColor = ['rgba(239,119,56,0.85)','rgba(84,90,192,0.75)','rgba(14,165,160,0.85)'];
+    clCharts['cl-cCertifs'].data.datasets[0].backgroundColor = ['rgba(239,119,56,0.85)','rgba(99,102,241,0.75)','rgba(14,165,160,0.85)'];
   } else {
-    var d = CL_STATS[f] || CL_STATS.all;
+    var d = CL_STATS[f]||CL_STATS.all;
     clCharts['cl-cCertifs'].data.labels = ['R\u00e9ussi','En cours','Abandonn\u00e9','\u00c9chou\u00e9'];
-    clCharts['cl-cCertifs'].data.datasets[0].data = [d.reussi, d.encours, d.abandonne, d.echoue];
-    clCharts['cl-cCertifs'].data.datasets[0].backgroundColor = ['rgba(34,197,94,0.85)','rgba(99,102,241,0.8)','rgba(148,163,184,0.6)','rgba(239,68,68,0.75)'];
+    clCharts['cl-cCertifs'].data.datasets[0].data = [d.reussi,d.encours,d.abandonne,d.echoue];
+    clCharts['cl-cCertifs'].data.datasets[0].backgroundColor = ['rgba(34,197,94,0.85)','rgba(99,102,241,0.8)','rgba(148,163,184,0.55)','rgba(239,68,68,0.75)'];
   }
   clCharts['cl-cCertifs'].update();
+  if(!clCharts['cl-cStatuts']) return;
+  var d2 = CL_STATS[f]||CL_STATS.all;
+  clCharts['cl-cStatuts'].data.datasets[0].data = [d2.reussi,d2.encours,d2.abandonne,d2.echoue];
+  clCharts['cl-cStatuts'].update();
+  var sub = document.getElementById('cl-statuts-sub');
+  if(sub) sub.textContent = f==='all'?'Toutes certifications':CL_LABELS[f]?CL_LABELS[f].nom:'';
 }
 
 function clRefreshCharts(){
-  CL_WIN_POS_I = Math.max(0, clMoisFilter(ALL_MOIS_INSCR).length - CL_WIN_SIZE);
   CL_WIN_POS_CA = Math.max(0, clMoisFilter(ALL_MOIS_CA).length - CL_WIN_SIZE);
   clRefreshInscr();
   clRefreshCA();
@@ -1679,26 +1698,40 @@ function clRefreshCharts(){
 
 function clBuildGlobal(){
   clWinInit();
-  var moisI = clWinSlice(ALL_MOIS_INSCR, CL_WIN_POS_I);
-  var moisCA = clWinSlice(ALL_MOIS_CA, CL_WIN_POS_CA);
+
+  // --- Graphe 1 : Inscriptions (inchange, deja reconstruit) ---
+  var moisAll = ALL_MOIS_INSCR;
+  clNewChart('cl-cInscr',{type:'bar',data:{labels:moisAll.map(clFmt),datasets:[
+    {label:'Fab. Additive',data:moisAll.map(function(m){return CL_INSCR.fa[m]||0;}),backgroundColor:'rgba(239,119,56,0.8)',borderRadius:2,stack:'s',order:2},
+    {label:'BIM',data:moisAll.map(function(m){return CL_INSCR.bim[m]||0;}),backgroundColor:'rgba(99,102,241,0.7)',borderRadius:2,stack:'s',order:2},
+    {label:'IA',data:moisAll.map(function(m){return CL_INSCR.ia[m]||0;}),backgroundColor:'rgba(14,165,160,0.8)',borderRadius:2,stack:'s',order:2},
+    {label:'Total',type:'line',data:moisAll.map(function(m){return (CL_INSCR.fa[m]||0)+(CL_INSCR.bim[m]||0)+(CL_INSCR.ia[m]||0);}),borderColor:'rgba(15,23,42,0.45)',borderWidth:2,pointRadius:2.5,pointBackgroundColor:'rgba(15,23,42,0.65)',tension:0.35,fill:false,order:1,yAxisID:'y'}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',align:'end',labels:{font:{size:10},boxWidth:9,padding:10,color:'#64748b',filter:function(item){return item.text!=='Total';}}},tooltip:{mode:'index',intersect:false,backgroundColor:'#0f172a',titleColor:'#94a3b8',bodyColor:'#cbd5e1',borderColor:'rgba(99,102,241,0.2)',borderWidth:1,padding:10,callbacks:{label:function(ctx){if(ctx.parsed.y===0&&ctx.dataset.stack) return null;return'  '+ctx.dataset.label+' : '+ctx.parsed.y;}}}},scales:{x:{stacked:true,grid:{display:false},ticks:{color:'#94a3b8',font:{size:9},maxRotation:45,minRotation:0}},y:{stacked:true,grid:{color:'rgba(241,245,249,0.9)'},ticks:{color:'#94a3b8',font:{size:10}}}}},interaction:{mode:'index',intersect:false}});
+  var totalInit = moisAll.reduce(function(acc,m){return acc+(CL_INSCR.fa[m]||0)+(CL_INSCR.bim[m]||0)+(CL_INSCR.ia[m]||0);},0);
+  var totEl = document.getElementById('cl-inscr-total');
+  if(totEl) totEl.textContent = totalInit+' dossiers';
+
+  // --- Graphe 2 : CA mensuel --- barres avec ligne cumul + gradient visuel ---
+  var moisCA = ALL_MOIS_CA.slice(Math.max(0,ALL_MOIS_CA.length-CL_WIN_SIZE));
   var realise = moisCA.map(function(m){return MOIS_FUTUR.indexOf(m)===-1 ? CL_CA.all[m]||0 : null;});
   var estime  = moisCA.map(function(m){return MOIS_FUTUR.indexOf(m)>=0  ? CL_CA.all[m]||0 : null;});
-
-  // Graphe inscriptions
-  clNewChart('cl-cInscr',{type:'bar',data:{labels:moisI.map(clFmt),datasets:[{data:moisI.map(function(m){return CL_INSCR.all[m]||0;}),backgroundColor:'rgba(84,90,192,0.65)',borderRadius:5,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#1a1d3a',titleColor:'#a5b4fc',bodyColor:'#e0e7ff',borderColor:'rgba(99,102,241,0.2)',borderWidth:1,padding:10,callbacks:{label:function(ctx){return'  '+ctx.parsed.y+' dossiers';}}}},scales:{x:{grid:{display:false},ticks:{color:'#94a3b8',font:{size:10}}},y:{grid:{color:'rgba(241,245,249,0.8)'},ticks:{color:'#94a3b8',font:{size:10}}}}}});
-
-  // Graphe CA — ligne + remplissage pour réalisé, barres pointillées pour estimé
   clNewChart('cl-cCA',{type:'bar',data:{labels:moisCA.map(clFmt),datasets:[
     {label:'CA r\u00e9alis\u00e9',data:realise,backgroundColor:'rgba(99,102,241,0.85)',borderRadius:5,borderSkipped:false,order:2},
-    {label:'CA estim\u00e9',data:estime,backgroundColor:'rgba(251,146,60,0.7)',borderRadius:5,borderSkipped:false,borderWidth:2,borderColor:'rgba(251,146,60,0.9)',order:2}
-  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',align:'end',labels:{font:{size:11},boxWidth:10,padding:12,color:'#64748b',usePointStyle:true,pointStyleWidth:8}},tooltip:{backgroundColor:'#0f172a',titleColor:'#a5b4fc',bodyColor:'#cbd5e1',borderColor:'rgba(99,102,241,0.3)',borderWidth:1,padding:12,callbacks:{label:function(ctx){if(ctx.parsed.y===null) return null;return'  '+ctx.dataset.label+' : '+ctx.parsed.y.toLocaleString('fr-FR')+' \u20ac';}}}},scales:{x:{grid:{display:false},ticks:{color:'#94a3b8',font:{size:10}}},y:{grid:{color:'rgba(241,245,249,0.9)',lineWidth:1},ticks:{color:'#94a3b8',font:{size:10},callback:function(v){return v>=1000?(v/1000).toFixed(0)+'k\u20ac':v+'\u20ac';}}}}}});
+    {label:'CA estim\u00e9',data:estime,backgroundColor:'rgba(251,146,60,0.75)',borderRadius:5,borderSkipped:false,borderWidth:0,order:2},
+    {label:'Cumul',type:'line',data:(function(){var c=0;return moisCA.map(function(m){var v=CL_CA.all[m]||0;c+=v;return c;});}()),borderColor:'rgba(15,23,42,0.35)',borderWidth:1.5,borderDash:[4,3],pointRadius:0,tension:0.3,fill:false,order:1,yAxisID:'y2'}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',align:'end',labels:{font:{size:10},boxWidth:9,padding:10,color:'#64748b',usePointStyle:true,filter:function(item){return item.text!=='Cumul';}}},tooltip:{backgroundColor:'#0f172a',titleColor:'#94a3b8',bodyColor:'#cbd5e1',borderColor:'rgba(99,102,241,0.25)',borderWidth:1,padding:12,mode:'index',intersect:false,callbacks:{label:function(ctx){if(ctx.parsed.y===null||ctx.dataset.label==='Cumul') return null;return'  '+ctx.dataset.label+' : '+ctx.parsed.y.toLocaleString('fr-FR')+' \u20ac';}}}},scales:{x:{grid:{display:false},ticks:{color:'#94a3b8',font:{size:10}}},y:{position:'left',grid:{color:'rgba(241,245,249,0.9)'},ticks:{color:'#94a3b8',font:{size:10},callback:function(v){return v>=1000?(v/1000).toFixed(0)+'k\u20ac':v+'\u20ac';}}},y2:{position:'right',display:false}}}});
+  var caTotal = moisCA.reduce(function(acc,m){return acc+(CL_CA.all[m]||0);},0);
+  var totCA = document.getElementById('cl-ca-total');
+  if(totCA) totCA.textContent = (caTotal/1000).toFixed(0)+'k\u20ac';
 
-  // Graphe répartition — donut
-  clNewChart('cl-cCertifs',{type:'doughnut',data:{labels:['Fab. Additive','BIM','IA P\u00e9da'],datasets:[{data:[1810,483,39],backgroundColor:['rgba(239,119,56,0.85)','rgba(84,90,192,0.75)','rgba(14,165,160,0.85)'],borderWidth:3,borderColor:'#fff',hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'right',labels:{font:{size:11},boxWidth:10,padding:12,color:'#374151',usePointStyle:true}},tooltip:{backgroundColor:'#0f172a',titleColor:'#a5b4fc',bodyColor:'#cbd5e1',borderColor:'rgba(99,102,241,0.3)',borderWidth:1,padding:10,callbacks:{label:function(ctx){var total=ctx.dataset.data.reduce(function(a,b){return a+b;},0);return'  '+ctx.label+' : '+ctx.parsed+' ('+Math.round(ctx.parsed/total*100)+'%)';}}}}}});
+  // --- Graphe 3a : Repartition certifications --- donut anneau ---
+  clNewChart('cl-cCertifs',{type:'doughnut',data:{labels:['Fab. Additive (1 810)','BIM (483)','IA (39)'],datasets:[{data:[1810,483,39],backgroundColor:['rgba(239,119,56,0.85)','rgba(99,102,241,0.75)','rgba(14,165,160,0.85)'],borderWidth:4,borderColor:'#f8fafc',hoverOffset:8,hoverBorderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:10,padding:10,color:'#374151',usePointStyle:true}},tooltip:{backgroundColor:'#0f172a',titleColor:'#a5b4fc',bodyColor:'#cbd5e1',borderColor:'rgba(99,102,241,0.3)',borderWidth:1,padding:10,callbacks:{label:function(ctx){var total=ctx.dataset.data.reduce(function(a,b){return a+b;},0);return'  '+ctx.label+' : '+Math.round(ctx.parsed/total*100)+'%';}}}}}});
+
+  // --- Graphe 3b : Statuts (horizontal bar) ---
+  clNewChart('cl-cStatuts',{type:'bar',data:{labels:['\u00c9chou\u00e9','Abandonn\u00e9','En cours','R\u00e9ussi'],datasets:[{data:[121,180,1064,967],backgroundColor:['rgba(239,68,68,0.7)','rgba(148,163,184,0.5)','rgba(99,102,241,0.75)','rgba(34,197,94,0.85)'],borderRadius:5,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#0f172a',titleColor:'#94a3b8',bodyColor:'#cbd5e1',borderColor:'rgba(99,102,241,0.25)',borderWidth:1,padding:10,callbacks:{label:function(ctx){var total=2332;return'  '+ctx.parsed.x+' dossiers ('+Math.round(ctx.parsed.x/total*100)+'%)';}}},datalabels:{display:false}},scales:{x:{grid:{color:'rgba(241,245,249,0.9)'},ticks:{color:'#94a3b8',font:{size:10}},border:{display:false}},y:{grid:{display:false},ticks:{color:'#374151',font:{size:11,weight:'600'}},border:{display:false}}}}});
 
   clUpdateNavBtns();
 }
-
 
 // BUILD CERTIFICATIONS (FA + IA seulement)
 // ----------------------------------------------------------------
